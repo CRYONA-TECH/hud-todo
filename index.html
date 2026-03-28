@@ -1,133 +1,191 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v1.0 — 2026-03-28 -->
+<!-- HUD TODO — v3.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v1.0</title>
+<title>HUD Task Manager v3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --cyan: #00f5ff;
-    --cyan-dim: rgba(0,245,255,0.15);
-    --cyan-mid: rgba(0,245,255,0.4);
-    --cyan-glow: rgba(0,245,255,0.08);
-    --red: #ff3c3c;
-    --amber: #ff8c00;
-    --green: #39ff85;
-    --bg: #020c10;
-    --bg2: #04151c;
-    --text: #a8eaf0;
-    --text-dim: rgba(168,234,240,0.45);
-    --mono: 'Share Tech Mono', monospace;
-    --head: 'Orbitron', monospace;
+    --ht-cyan: #00f5ff;
+    --ht-cyan-dim: rgba(0,245,255,0.15);
+    --ht-cyan-mid: rgba(0,245,255,0.4);
+    --ht-cyan-glow: rgba(0,245,255,0.08);
+    --ht-red: #ff3c3c;
+    --ht-amber: #ff8c00;
+    --ht-green: #39ff85;
+    --ht-bg: #020818;
+    --ht-bg2: #030d24;
+    --ht-text: #a0c8f0;
+    --ht-text-dim: rgba(160,200,240,0.45);
+    --ht-mono: 'Share Tech Mono', monospace;
+    --ht-head: 'Orbitron', monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
-    background: var(--bg);
+    background: var(--ht-bg);
     min-height: 100vh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 2rem 1rem;
+    padding: 32px 10%;
   }
 
-  .hud {
+  .hud-todo-wrap {
     width: 100%;
-    max-width: 640px;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 1.4rem;
+    background: var(--ht-bg);
+    color: var(--ht-text);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 28px;
     position: relative;
-    border: 1px solid var(--cyan-mid);
-    box-shadow: 0 0 40px rgba(0,245,255,0.06), inset 0 0 60px rgba(0,245,255,0.02);
+    border: 1px solid var(--ht-cyan-mid);
+    box-shadow: 0 0 40px rgba(0,100,255,0.08), inset 0 0 60px rgba(0,80,200,0.03);
     overflow: hidden;
   }
 
-  .hud::before {
+  .hud-todo-wrap::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,245,255,0.015) 2px, rgba(0,245,255,0.015) 4px);
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,100,255,0.012) 2px, rgba(0,100,255,0.012) 4px);
     pointer-events: none;
     z-index: 0;
   }
 
-  .hud > * { position: relative; z-index: 1; }
+  .hud-todo-wrap > * { position: relative; z-index: 1; }
 
-  .hud-header {
+  .hud-todo-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.2rem;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--cyan-mid);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ht-cyan-mid);
     position: relative;
   }
-  .hud-header::after {
+  .hud-todo-header::after {
     content: '';
     position: absolute;
     bottom: -3px; left: 0;
     width: 40%; height: 1px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
+    background: var(--ht-cyan);
+    box-shadow: 0 0 8px var(--ht-cyan);
   }
 
-  .hud-title { font-family: var(--head); font-size: 13px; letter-spacing: 3px; color: var(--cyan); text-transform: uppercase; }
-  .hud-id { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+  .hud-todo-title {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+  }
+  .hud-todo-id {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+  }
 
-  .status-dot {
-    width: 7px; height: 7px;
+  .hud-todo-status-dot {
+    width: 8px; height: 8px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 10px var(--green);
+    background: var(--ht-green);
+    box-shadow: 0 0 10px var(--ht-green);
     display: inline-block;
-    margin-right: 6px;
-    animation: pulse-dot 2s ease-in-out infinite;
+    margin-right: 8px;
+    animation: ht-pulse-dot 2s ease-in-out infinite;
   }
-  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes ht-pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.2rem; }
+  .hud-todo-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
 
-  .stat-box {
-    background: var(--bg2);
-    border: 1px solid var(--cyan-mid);
-    padding: 8px 10px;
+  .hud-todo-stat-box {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    padding: 10px 14px;
     position: relative;
-    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   }
-  .stat-box::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
-  .stat-n { font-family: var(--head); font-size: 22px; color: var(--cyan); line-height: 1; text-shadow: 0 0 12px var(--cyan); }
-  .stat-l { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .hud-todo-stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 6px var(--ht-cyan);
+  }
+  .hud-todo-stat-n {
+    font-family: var(--ht-head);
+    font-size: 28px;
+    color: var(--ht-cyan);
+    line-height: 1;
+    text-shadow: 0 0 12px var(--ht-cyan);
+  }
+  .hud-todo-stat-l {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
 
-  .input-zone { display: flex; gap: 6px; margin-bottom: 1.2rem; align-items: center; }
+  /* Input zone */
+  .hud-todo-input-zone {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
 
-  .hud-input {
+  .hud-todo-input {
     flex: 1;
-    background: var(--bg2);
-    border: 1px solid var(--cyan-mid);
-    color: var(--cyan);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 8px 12px;
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-cyan);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 10px 16px;
     outline: none;
     letter-spacing: 1px;
     transition: border-color 0.2s, box-shadow 0.2s;
-    height: 36px;
+    height: 46px;
   }
-  .hud-input::placeholder { color: var(--text-dim); }
-  .hud-input:focus { border-color: var(--cyan); box-shadow: 0 0 12px var(--cyan-dim), inset 0 0 8px var(--cyan-glow); }
+  .hud-todo-input::placeholder { color: var(--ht-text-dim); }
+  .hud-todo-input:focus {
+    border-color: var(--ht-cyan);
+    box-shadow: 0 0 12px var(--ht-cyan-dim), inset 0 0 8px var(--ht-cyan-glow);
+  }
 
-  .sphere-pick { display: flex; gap: 6px; align-items: center; }
+  /* Category select */
+  .hud-todo-cat-select {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-text);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 0 12px;
+    height: 46px;
+    outline: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+    min-width: 160px;
+  }
+  .hud-todo-cat-select:focus { border-color: var(--ht-cyan); }
+  .hud-todo-cat-select option { background: var(--ht-bg2); color: var(--ht-text); }
 
-  .sphere {
-    width: 18px; height: 18px;
+  .hud-todo-sphere-pick { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  .hud-todo-sphere {
+    width: 22px; height: 22px;
     border-radius: 50%;
     cursor: pointer;
     position: relative;
@@ -135,31 +193,52 @@
     flex-shrink: 0;
     border: 2px solid transparent;
   }
-  .sphere::after {
+  .hud-todo-sphere::after {
     content: '';
     position: absolute;
-    top: 2px; left: 3px;
-    width: 5px; height: 4px;
+    top: 3px; left: 4px;
+    width: 6px; height: 5px;
     border-radius: 50%;
     background: rgba(255,255,255,0.35);
   }
-  .sphere:hover { transform: scale(1.2); }
+  .hud-todo-sphere:hover { transform: scale(1.2); }
+  .hud-todo-sphere.s-high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 6px rgba(255,60,60,0.6); }
+  .hud-todo-sphere.s-med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 6px rgba(255,140,0,0.6); }
+  .hud-todo-sphere.s-low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 6px rgba(57,255,133,0.6); }
+  .hud-todo-sphere.active.s-high { border-color: var(--ht-red); box-shadow: 0 0 12px rgba(255,60,60,0.9), 0 0 20px rgba(255,60,60,0.4); transform: scale(1.25); }
+  .hud-todo-sphere.active.s-med  { border-color: var(--ht-amber); box-shadow: 0 0 12px rgba(255,140,0,0.9), 0 0 20px rgba(255,140,0,0.4); transform: scale(1.25); }
+  .hud-todo-sphere.active.s-low  { border-color: var(--ht-green); box-shadow: 0 0 12px rgba(57,255,133,0.9), 0 0 20px rgba(57,255,133,0.4); transform: scale(1.25); }
 
-  .sphere.s-high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 6px rgba(255,60,60,0.6); }
-  .sphere.s-med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 6px rgba(255,140,0,0.6); }
-  .sphere.s-low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 6px rgba(57,255,133,0.6); }
-
-  .sphere.active.s-high { border-color: var(--red); box-shadow: 0 0 12px rgba(255,60,60,0.9), 0 0 20px rgba(255,60,60,0.4); transform: scale(1.25); }
-  .sphere.active.s-med  { border-color: var(--amber); box-shadow: 0 0 12px rgba(255,140,0,0.9), 0 0 20px rgba(255,140,0,0.4); transform: scale(1.25); }
-  .sphere.active.s-low  { border-color: var(--green); box-shadow: 0 0 12px rgba(57,255,133,0.9), 0 0 20px rgba(57,255,133,0.4); transform: scale(1.25); }
-
-  .hud-btn {
+  /* Buttons */
+  .hud-todo-btn {
     background: transparent;
-    border: 1px solid var(--cyan);
-    color: var(--cyan);
-    font-family: var(--head);
-    font-size: 10px;
-    padding: 0 14px;
+    border: 1px solid var(--ht-cyan);
+    color: var(--ht-cyan);
+    font-family: var(--ht-head);
+    font-size: 16px;
+    padding: 0 20px;
+    height: 46px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .hud-todo-btn::before { content:''; position:absolute; inset:0; background:var(--ht-cyan-dim); opacity:0; transition:opacity 0.15s; }
+  .hud-todo-btn:hover::before { opacity:1; }
+  .hud-todo-btn:hover { box-shadow: 0 0 16px var(--ht-cyan-dim); }
+  .hud-todo-btn:active { transform: scale(0.97); }
+
+  .hud-todo-btn-cat {
+    background: transparent;
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-head);
+    font-size: 13px;
+    padding: 0 16px;
     height: 36px;
     cursor: pointer;
     letter-spacing: 2px;
@@ -169,153 +248,403 @@
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
+    margin-bottom: 20px;
   }
-  .hud-btn::before { content:''; position:absolute; inset:0; background:var(--cyan-dim); opacity:0; transition:opacity 0.15s; }
-  .hud-btn:hover::before { opacity:1; }
-  .hud-btn:hover { box-shadow: 0 0 16px var(--cyan-dim); }
-  .hud-btn:active { transform: scale(0.97); }
+  .hud-todo-btn-cat:hover { border-color: var(--ht-cyan); color: var(--ht-cyan); box-shadow: 0 0 10px var(--ht-cyan-dim); }
+  .hud-todo-btn-cat:active { transform: scale(0.97); }
 
-  .section-label {
-    font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
-    margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+  /* Modal */
+  .hud-todo-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2,8,24,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
   }
-  .section-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--cyan-mid), transparent); }
+  .hud-todo-modal-overlay.open { display: flex; }
 
-  .task-list { display: flex; flex-direction: column; gap: 5px; }
+  .hud-todo-modal {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    padding: 28px;
+    width: 400px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,245,255,0.1);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  }
+  .hud-todo-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 8px var(--ht-cyan);
+  }
 
-  .task-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px;
-    background: var(--bg2);
-    border: 1px solid rgba(0,245,255,0.12);
-    border-left: 2px solid var(--cyan);
+  .hud-todo-modal-title {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hud-todo-modal-input {
+    width: 100%;
+    background: var(--ht-bg);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-cyan);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 10px 16px;
+    outline: none;
+    letter-spacing: 1px;
+    height: 46px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .hud-todo-modal-input:focus { border-color: var(--ht-cyan); box-shadow: 0 0 12px var(--ht-cyan-dim); }
+  .hud-todo-modal-input::placeholder { color: var(--ht-text-dim); }
+
+  .hud-todo-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .hud-todo-modal-cancel {
+    background: transparent;
+    border: 1px solid var(--ht-text-dim);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-head);
+    font-size: 13px;
+    padding: 0 16px;
+    height: 38px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .hud-todo-modal-cancel:hover { border-color: var(--ht-text); color: var(--ht-text); }
+
+  /* Section label */
+  .hud-todo-section-label {
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hud-todo-section-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--ht-cyan-mid), transparent); }
+
+  /* Category blocks */
+  .hud-todo-cat-block { margin-bottom: 28px; }
+
+  .hud-todo-cat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(0,245,255,0.15);
+  }
+  .hud-todo-cat-name {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+  }
+  .hud-todo-cat-count {
+    font-size: 13px;
+    color: var(--ht-text-dim);
+    letter-spacing: 1px;
+  }
+  .hud-todo-cat-del {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: rgba(255,60,60,0.3);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--ht-mono);
+    transition: color 0.15s;
+    padding: 0 4px;
+    letter-spacing: 1px;
+  }
+  .hud-todo-cat-del:hover { color: var(--ht-red); }
+
+  .hud-todo-task-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .hud-todo-task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--ht-bg2);
+    border: 1px solid rgba(0,100,255,0.12);
+    border-left: 2px solid var(--ht-cyan);
     transition: all 0.2s;
-    animation: slide-in 0.25s ease;
+    animation: ht-slide-in 0.25s ease;
   }
-  @keyframes slide-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
-  .task-item:hover { border-color: var(--cyan-mid); background: rgba(0,245,255,0.04); }
-  .task-item.done { border-left-color: rgba(0,245,255,0.2); opacity: 0.45; }
-  .task-item.done .task-text { text-decoration: line-through; color: var(--text-dim); }
-  .task-item.prio-high { border-left-color: var(--red); }
-  .task-item.prio-high:not(.done) { background: rgba(255,60,60,0.03); }
-  .task-item.prio-low { border-left-color: rgba(57,255,133,0.5); }
-  .task-item.prio-med { border-left-color: var(--amber); }
+  @keyframes ht-slide-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+  .hud-todo-task-item:hover { border-color: var(--ht-cyan-mid); background: rgba(0,100,255,0.04); }
+  .hud-todo-task-item.done { border-left-color: rgba(0,100,255,0.2); opacity: 0.45; }
+  .hud-todo-task-item.done .hud-todo-task-text { text-decoration: line-through; color: var(--ht-text-dim); }
+  .hud-todo-task-item.prio-high { border-left-color: var(--ht-red); }
+  .hud-todo-task-item.prio-high:not(.done) { background: rgba(255,60,60,0.03); }
+  .hud-todo-task-item.prio-low { border-left-color: rgba(57,255,133,0.5); }
+  .hud-todo-task-item.prio-med { border-left-color: var(--ht-amber); }
 
-  .hud-check {
-    appearance: none; width:14px; height:14px;
-    border: 1px solid var(--cyan-mid); background: transparent;
-    cursor: pointer; flex-shrink: 0; position: relative; transition: all 0.15s;
+  .hud-todo-check {
+    appearance: none;
+    width: 16px; height: 16px;
+    border: 1px solid var(--ht-cyan-mid);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.15s;
   }
-  .hud-check:checked { background: var(--cyan-dim); border-color: var(--cyan); }
-  .hud-check:checked::after { content:'✓'; position:absolute; top:-2px; left:1px; font-size:11px; color:var(--cyan); }
+  .hud-todo-check:checked { background: var(--ht-cyan-dim); border-color: var(--ht-cyan); }
+  .hud-todo-check:checked::after { content:'✓'; position:absolute; top:-2px; left:2px; font-size:13px; color:var(--ht-cyan); }
 
-  .task-text { flex: 1; font-size: 12px; letter-spacing: 0.5px; color: var(--text); }
+  .hud-todo-task-text { flex: 1; font-size: 16px; letter-spacing: 0.5px; color: var(--ht-text); }
 
-  .task-sphere {
-    width: 10px; height: 10px;
+  .hud-todo-task-sphere {
+    width: 12px; height: 12px;
     border-radius: 50%;
     flex-shrink: 0;
     position: relative;
   }
-  .task-sphere::after { content:''; position:absolute; top:1px; left:2px; width:3px; height:2px; border-radius:50%; background:rgba(255,255,255,0.35); }
-  .task-sphere.high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 4px rgba(255,60,60,0.7); }
-  .task-sphere.med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 4px rgba(255,140,0,0.7); }
-  .task-sphere.low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 4px rgba(57,255,133,0.7); }
+  .hud-todo-task-sphere::after { content:''; position:absolute; top:2px; left:2px; width:4px; height:3px; border-radius:50%; background:rgba(255,255,255,0.35); }
+  .hud-todo-task-sphere.high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 4px rgba(255,60,60,0.7); }
+  .hud-todo-task-sphere.med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 4px rgba(255,140,0,0.7); }
+  .hud-todo-task-sphere.low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 4px rgba(57,255,133,0.7); }
 
-  .del-btn { background:none; border:none; color:rgba(255,60,60,0.4); cursor:pointer; font-size:12px; padding:0 2px; transition:color 0.15s; font-family:var(--mono); flex-shrink:0; }
-  .del-btn:hover { color: var(--red); }
+  .hud-todo-del-btn {
+    background: none;
+    border: none;
+    color: rgba(255,60,60,0.4);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    transition: color 0.15s;
+    font-family: var(--ht-mono);
+    flex-shrink: 0;
+  }
+  .hud-todo-del-btn:hover { color: var(--ht-red); }
 
-  .empty-state { text-align:center; color:var(--text-dim); font-size:11px; letter-spacing:2px; padding:2rem 0; text-transform:uppercase; }
-  .empty-state::before { display:block; content:'[ AUCUNE TÂCHE ACTIVE ]'; color:var(--cyan-mid); margin-bottom:4px; font-family:var(--head); font-size:10px; }
+  .hud-todo-empty-state {
+    text-align: center;
+    color: var(--ht-text-dim);
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 48px 0;
+    text-transform: uppercase;
+  }
+  .hud-todo-empty-state::before {
+    display: block;
+    content: '[ AUCUNE TÂCHE ACTIVE ]';
+    color: var(--ht-cyan-mid);
+    margin-bottom: 6px;
+    font-family: var(--ht-head);
+    font-size: 16px;
+  }
 
-  .corner-tl, .corner-br { position:absolute; width:12px; height:12px; pointer-events:none; }
-  .corner-tl { top:0; left:0; border-top:2px solid var(--cyan); border-left:2px solid var(--cyan); }
-  .corner-br { bottom:0; right:0; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); }
+  .hud-todo-corner-tl,
+  .hud-todo-corner-br { position:absolute; width:14px; height:14px; pointer-events:none; }
+  .hud-todo-corner-tl { top:0; left:0; border-top:2px solid var(--ht-cyan); border-left:2px solid var(--ht-cyan); }
+  .hud-todo-corner-br { bottom:0; right:0; border-bottom:2px solid var(--ht-cyan); border-right:2px solid var(--ht-cyan); }
 
-  .progress-wrap { margin-bottom: 6px; background:var(--bg2); border:1px solid var(--cyan-mid); height:4px; position:relative; overflow:visible; }
-  .progress-bar { height:100%; background:var(--cyan); box-shadow:0 0 10px var(--cyan); transition:width 0.4s ease; position:relative; }
-  .progress-bar::after { content:''; position:absolute; right:0; top:-2px; width:1px; height:8px; background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
-  .progress-label { font-size:9px; color:var(--text-dim); letter-spacing:2px; text-align:right; margin-top:4px; margin-bottom:10px; text-transform:uppercase; }
+  .hud-todo-progress-wrap {
+    margin-bottom: 6px;
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    height: 4px;
+    position: relative;
+    overflow: visible;
+  }
+  .hud-todo-progress-bar {
+    height: 100%;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 10px var(--ht-cyan);
+    transition: width 0.4s ease;
+    position: relative;
+  }
+  .hud-todo-progress-bar::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -2px;
+    width: 1px; height: 8px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 6px var(--ht-cyan);
+  }
+  .hud-todo-progress-label {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+    text-align: right;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
 
-  .scanline { position:absolute; left:0; right:0; height:2px; background:linear-gradient(to bottom,transparent,rgba(0,245,255,0.06),transparent); animation:scan 6s linear infinite; pointer-events:none; z-index:2; }
-  @keyframes scan { from{top:-2px} to{top:100%} }
+  .hud-todo-scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to bottom, transparent, rgba(0,100,255,0.06), transparent);
+    animation: ht-scan 6s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+  }
+  @keyframes ht-scan { from{top:-2px} to{top:100%} }
 
-  @media (max-width: 480px) {
+  @media (max-width: 600px) {
     html, body { padding: 0; }
-    .hud { border: none; min-height: 100vh; }
-    .stat-n { font-size: 18px; }
+    .hud-todo-wrap { border: none; min-height: 100vh; width: 100%; }
+    .hud-todo-stat-n { font-size: 22px; }
+    .hud-todo-input-zone { flex-wrap: wrap; }
+    .hud-todo-cat-select { min-width: 120px; }
   }
 </style>
 </head>
 <body>
-<div class="hud">
-  <div class="scanline"></div>
-  <div class="corner-tl"></div>
-  <div class="corner-br"></div>
 
-  <div class="hud-header">
+<!-- Modal ajout catégorie -->
+<div class="hud-todo-modal-overlay" id="ht-modal">
+  <div class="hud-todo-modal">
+    <div class="hud-todo-modal-title">◈ Nouvelle catégorie</div>
+    <input class="hud-todo-modal-input" id="ht-cat-inp" type="text" placeholder="◌ Nom de la catégorie..." />
+    <div class="hud-todo-modal-actions">
+      <button class="hud-todo-modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="hud-todo-btn" onclick="confirmAddCategory()" style="font-size:13px;height:38px;padding:0 16px;">▶ Créer</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud-todo-wrap">
+  <div class="hud-todo-scanline"></div>
+  <div class="hud-todo-corner-tl"></div>
+  <div class="hud-todo-corner-br"></div>
+
+  <div class="hud-todo-header">
     <div>
-      <div class="hud-title">◈ Tactical Task Manager</div>
-      <div class="hud-id"><span class="status-dot"></span>SYS.ONLINE — OPR.AUTHENTICATED</div>
+      <div class="hud-todo-title">◈ Tactical Task Manager</div>
+      <div class="hud-todo-id"><span class="hud-todo-status-dot"></span>SYS.ONLINE — OPR.AUTHENTICATED</div>
     </div>
-    <div class="hud-id" id="clock-display">00:00:00</div>
+    <div class="hud-todo-id" id="ht-clock">00:00:00</div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-box"><div class="stat-n" id="s-total">0</div><div class="stat-l">Missions</div></div>
-    <div class="stat-box"><div class="stat-n" id="s-done">0</div><div class="stat-l">Exécutées</div></div>
-    <div class="stat-box"><div class="stat-n" id="s-remain">0</div><div class="stat-l">En attente</div></div>
+  <div class="hud-todo-stats-row">
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-total">0</div><div class="hud-todo-stat-l">Missions</div></div>
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-done">0</div><div class="hud-todo-stat-l">Exécutées</div></div>
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-remain">0</div><div class="hud-todo-stat-l">En attente</div></div>
   </div>
 
-  <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
-  <div class="progress-label" id="progress-label">COMPLETION — 0%</div>
+  <div class="hud-todo-progress-wrap"><div class="hud-todo-progress-bar" id="ht-progress" style="width:0%"></div></div>
+  <div class="hud-todo-progress-label" id="ht-progress-label">COMPLETION — 0%</div>
 
-  <div class="input-zone">
-    <input class="hud-input" id="inp" type="text" placeholder="◌ Entrer directive..." />
-    <div class="sphere-pick">
-      <div class="sphere s-high active" id="sp-high" onclick="selectPrio('high')" title="Critique"></div>
-      <div class="sphere s-med"         id="sp-med"  onclick="selectPrio('med')"  title="Normal"></div>
-      <div class="sphere s-low"         id="sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
+  <div class="hud-todo-input-zone">
+    <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
+    <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
+    <div class="hud-todo-sphere-pick">
+      <div class="hud-todo-sphere s-high active" id="ht-sp-high" onclick="selectPrio('high')" title="Critique"></div>
+      <div class="hud-todo-sphere s-med"         id="ht-sp-med"  onclick="selectPrio('med')"  title="Normal"></div>
+      <div class="hud-todo-sphere s-low"         id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
     </div>
-    <button class="hud-btn" onclick="addTask()">▶ EXEC</button>
+    <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
   </div>
 
-  <div class="section-label">Directives actives</div>
-  <div class="task-list" id="list"></div>
+  <button class="hud-todo-btn-cat" onclick="openModal()">+ Add category</button>
+
+  <div class="hud-todo-section-label">Directives actives</div>
+  <div id="ht-list"></div>
 </div>
 
 <script>
   let tasks = [];
+  let categories = [];
   let currentPrio = 'high';
 
-  function selectPrio(p) {
-    currentPrio = p;
-    ['high','med','low'].forEach(x => {
-      const el = document.getElementById('sp-' + x);
-      el.className = 'sphere s-' + x + (x === p ? ' active' : '');
-    });
-  }
-
+  // Clock
   function updateClock() {
     const n = new Date();
     const pad = v => String(v).padStart(2,'0');
-    document.getElementById('clock-display').textContent =
+    document.getElementById('ht-clock').textContent =
       pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
   }
   setInterval(updateClock, 1000);
   updateClock();
 
+  // Storage
   function load() {
-    try { const r = localStorage.getItem('hud_tasks'); if (r) tasks = JSON.parse(r); } catch(e) { tasks = []; }
+    try { const r = localStorage.getItem('hud_tasks_v3'); if (r) tasks = JSON.parse(r); } catch(e) { tasks = []; }
+    try { const r = localStorage.getItem('hud_cats_v3'); if (r) categories = JSON.parse(r); } catch(e) { categories = []; }
+    renderCatSelect();
     render();
   }
-  function save() { try { localStorage.setItem('hud_tasks', JSON.stringify(tasks)); } catch(e) {} }
+  function save() {
+    try { localStorage.setItem('hud_tasks_v3', JSON.stringify(tasks)); } catch(e) {}
+    try { localStorage.setItem('hud_cats_v3', JSON.stringify(categories)); } catch(e) {}
+  }
 
+  // Priority
+  function selectPrio(p) {
+    currentPrio = p;
+    ['high','med','low'].forEach(x => {
+      document.getElementById('ht-sp-' + x).className = 'hud-todo-sphere s-' + x + (x === p ? ' active' : '');
+    });
+  }
+
+  // Modal
+  function openModal() {
+    document.getElementById('ht-modal').classList.add('open');
+    setTimeout(() => document.getElementById('ht-cat-inp').focus(), 50);
+  }
+  function closeModal() {
+    document.getElementById('ht-modal').classList.remove('open');
+    document.getElementById('ht-cat-inp').value = '';
+  }
+  function confirmAddCategory() {
+    const name = document.getElementById('ht-cat-inp').value.trim();
+    if (!name) return;
+    if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) { closeModal(); return; }
+    categories.push({ id: String(Date.now()), name });
+    save();
+    renderCatSelect();
+    closeModal();
+  }
+  document.getElementById('ht-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById('ht-cat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddCategory(); if (e.key === 'Escape') closeModal(); });
+
+  // Category select
+  function renderCatSelect() {
+    const sel = document.getElementById('ht-cat-sel');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Catégorie —</option>' +
+      categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    if (prev) sel.value = prev;
+  }
+
+  function delCategory(id) {
+    categories = categories.filter(c => c.id !== id);
+    tasks = tasks.map(t => t.cat === String(id) ? { ...t, cat: '' } : t);
+    save();
+    renderCatSelect();
+    render();
+  }
+
+  // Tasks
   function addTask() {
-    const inp = document.getElementById('inp');
+    const inp = document.getElementById('ht-inp');
     const text = inp.value.trim();
     if (!text) return;
-    tasks.unshift({ id: Date.now(), text, prio: currentPrio, done: false });
+    const catId = document.getElementById('ht-cat-sel').value;
+    tasks.unshift({ id: Date.now(), text, prio: currentPrio, done: false, cat: String(catId) });
     inp.value = '';
     save(); render();
   }
@@ -323,29 +652,64 @@
   function toggle(id) { const t = tasks.find(t => t.id === id); if (t) { t.done = !t.done; save(); render(); } }
   function del(id) { tasks = tasks.filter(t => t.id !== id); save(); render(); }
 
+  function taskHTML(t) {
+    return `<div class="hud-todo-task-item prio-${t.prio}${t.done ? ' done' : ''}">
+      <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle(${t.id})" />
+      <div class="hud-todo-task-sphere ${t.prio}"></div>
+      <span class="hud-todo-task-text">${t.text}</span>
+      <button class="hud-todo-del-btn" onclick="del(${t.id})">✕</button>
+    </div>`;
+  }
+
   function render() {
     const done = tasks.filter(t => t.done).length;
     const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-    document.getElementById('s-total').textContent = tasks.length;
-    document.getElementById('s-done').textContent = done;
-    document.getElementById('s-remain').textContent = tasks.length - done;
-    document.getElementById('progress-bar').style.width = pct + '%';
-    document.getElementById('progress-label').textContent = 'COMPLETION — ' + pct + '%';
+    document.getElementById('ht-total').textContent = tasks.length;
+    document.getElementById('ht-done').textContent = done;
+    document.getElementById('ht-remain').textContent = tasks.length - done;
+    document.getElementById('ht-progress').style.width = pct + '%';
+    document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
 
-    const list = document.getElementById('list');
-    if (!tasks.length) { list.innerHTML = '<div class="empty-state">Aucune directive en cours</div>'; return; }
+    const list = document.getElementById('ht-list');
 
-    list.innerHTML = tasks.map(t => `
-      <div class="task-item prio-${t.prio}${t.done ? ' done' : ''}">
-        <input class="hud-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle(${t.id})" />
-        <div class="task-sphere ${t.prio}"></div>
-        <span class="task-text">${t.text}</span>
-        <button class="del-btn" onclick="del(${t.id})">✕</button>
-      </div>
-    `).join('');
+    if (!tasks.length) {
+      list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
+      return;
+    }
+
+    let html = '';
+
+    // Blocks par catégorie
+    categories.forEach(cat => {
+      const catTasks = tasks.filter(t => t.cat === cat.id);
+      if (!catTasks.length) return;
+      const catDone = catTasks.filter(t => t.done).length;
+      html += `<div class="hud-todo-cat-block">
+        <div class="hud-todo-cat-header">
+          <span class="hud-todo-cat-name">◈ ${cat.name}</span>
+          <span class="hud-todo-cat-count">${catDone}/${catTasks.length}</span>
+          <button class="hud-todo-cat-del" onclick="delCategory(${cat.id})" title="Supprimer catégorie">✕ suppr.</button>
+        </div>
+        <div class="hud-todo-task-list">${catTasks.map(taskHTML).join('')}</div>
+      </div>`;
+    });
+
+    // Bloc sans catégorie
+    const uncatTasks = tasks.filter(t => !t.cat || t.cat === '');
+    if (uncatTasks.length) {
+      html += `<div class="hud-todo-cat-block">
+        <div class="hud-todo-cat-header">
+          <span class="hud-todo-cat-name" style="color:var(--ht-text-dim)">◌ Sans catégorie</span>
+          <span class="hud-todo-cat-count">${uncatTasks.filter(t=>t.done).length}/${uncatTasks.length}</span>
+        </div>
+        <div class="hud-todo-task-list">${uncatTasks.map(taskHTML).join('')}</div>
+      </div>`;
+    }
+
+    list.innerHTML = html;
   }
 
-  document.getElementById('inp').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+  document.getElementById('ht-inp').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
   load();
 </script>
 </body>
