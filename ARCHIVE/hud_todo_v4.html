@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v5.0 — 2026-03-28 -->
+<!-- HUD TODO — v4.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v5.0</title>
+<title>HUD Task Manager v4.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -99,18 +99,6 @@
   }
   @keyframes ht-pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .hud-todo-sync-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 6px;
-    background: var(--ht-text-dim);
-    transition: background 0.3s, box-shadow 0.3s;
-  }
-  .hud-todo-sync-dot.syncing { background: var(--ht-amber); box-shadow: 0 0 8px var(--ht-amber); animation: ht-pulse-dot 0.8s ease-in-out infinite; }
-  .hud-todo-sync-dot.synced  { background: var(--ht-green); box-shadow: 0 0 8px var(--ht-green); }
-  .hud-todo-sync-dot.error   { background: var(--ht-red); box-shadow: 0 0 8px var(--ht-red); }
-
   .hud-todo-stats-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -148,6 +136,7 @@
     margin-top: 4px;
   }
 
+  /* Input zone */
   .hud-todo-input-zone {
     display: flex;
     gap: 8px;
@@ -174,6 +163,7 @@
     box-shadow: 0 0 12px var(--ht-cyan-dim), inset 0 0 8px var(--ht-cyan-glow);
   }
 
+  /* Category select */
   .hud-todo-cat-select {
     background: var(--ht-bg2);
     border: 1px solid var(--ht-cyan-mid);
@@ -219,6 +209,7 @@
   .hud-todo-sphere.active.s-med  { border-color: var(--ht-amber); box-shadow: 0 0 12px rgba(255,140,0,0.9), 0 0 20px rgba(255,140,0,0.4); transform: scale(1.25); }
   .hud-todo-sphere.active.s-low  { border-color: var(--ht-green); box-shadow: 0 0 12px rgba(57,255,133,0.9), 0 0 20px rgba(57,255,133,0.4); transform: scale(1.25); }
 
+  /* Buttons */
   .hud-todo-btn {
     background: transparent;
     border: 1px solid var(--ht-cyan);
@@ -262,6 +253,7 @@
   .hud-todo-btn-cat:hover { border-color: var(--ht-cyan); color: var(--ht-cyan); box-shadow: 0 0 10px var(--ht-cyan-dim); }
   .hud-todo-btn-cat:active { transform: scale(0.97); }
 
+  /* Modal */
   .hud-todo-modal-overlay {
     display: none;
     position: fixed;
@@ -334,6 +326,7 @@
   }
   .hud-todo-modal-cancel:hover { border-color: var(--ht-text); color: var(--ht-text); }
 
+  /* Section label */
   .hud-todo-section-label {
     font-size: 16px;
     letter-spacing: 3px;
@@ -346,42 +339,7 @@
   }
   .hud-todo-section-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--ht-cyan-mid), transparent); }
 
-  .hud-todo-filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .hud-todo-filter-label {
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: var(--ht-text-dim);
-    text-transform: uppercase;
-    margin-right: 4px;
-    flex-shrink: 0;
-  }
-  .hud-todo-filter-btn {
-    background: transparent;
-    border: 1px solid rgba(0,245,255,0.2);
-    color: var(--ht-text-dim);
-    font-family: var(--ht-mono);
-    font-size: 13px;
-    padding: 4px 14px;
-    height: 30px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.15s;
-    flex-shrink: 0;
-  }
-  .hud-todo-filter-btn:hover { border-color: var(--ht-cyan-mid); color: var(--ht-text); }
-  .hud-todo-filter-btn.active {
-    border-color: var(--ht-cyan);
-    color: var(--ht-cyan);
-    background: var(--ht-cyan-glow);
-    box-shadow: 0 0 8px var(--ht-cyan-dim);
-  }
-
+  /* Category blocks */
   .hud-todo-cat-block { margin-bottom: 28px; }
 
   .hud-todo-cat-header {
@@ -399,7 +357,11 @@
     color: var(--ht-cyan);
     text-transform: uppercase;
   }
-  .hud-todo-cat-count { font-size: 13px; color: var(--ht-text-dim); letter-spacing: 1px; }
+  .hud-todo-cat-count {
+    font-size: 13px;
+    color: var(--ht-text-dim);
+    letter-spacing: 1px;
+  }
   .hud-todo-cat-del {
     margin-left: auto;
     background: none;
@@ -548,10 +510,49 @@
     .hud-todo-input-zone { flex-wrap: wrap; }
     .hud-todo-cat-select { min-width: 120px; }
   }
+
+  /* Filter bar */
+  .hud-todo-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hud-todo-filter-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--ht-text-dim);
+    text-transform: uppercase;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn {
+    background: transparent;
+    border: 1px solid rgba(0,245,255,0.2);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-mono);
+    font-size: 13px;
+    padding: 4px 14px;
+    height: 30px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn:hover { border-color: var(--ht-cyan-mid); color: var(--ht-text); }
+  .hud-todo-filter-btn.active {
+    border-color: var(--ht-cyan);
+    color: var(--ht-cyan);
+    background: var(--ht-cyan-glow);
+    box-shadow: 0 0 8px var(--ht-cyan-dim);
+  }
+  .hud-todo-filter-sep { width: 1px; height: 20px; background: var(--ht-cyan-mid); flex-shrink: 0; margin: 0 4px; }
 </style>
 </head>
 <body>
 
+<!-- Modal ajout catégorie -->
 <div class="hud-todo-modal-overlay" id="ht-modal">
   <div class="hud-todo-modal">
     <div class="hud-todo-modal-title">◈ Nouvelle catégorie</div>
@@ -573,10 +574,7 @@
       <div class="hud-todo-title">◈ Tactical Task Manager</div>
       <div class="hud-todo-id"><span class="hud-todo-status-dot"></span>SYS.ONLINE — OPR.AUTHENTICATED</div>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="hud-todo-id"><span class="hud-todo-sync-dot" id="ht-sync-dot"></span><span id="ht-sync-label">CONNECTING...</span></div>
-      <div class="hud-todo-id" id="ht-clock">00:00:00</div>
-    </div>
+    <div class="hud-todo-id" id="ht-clock">00:00:00</div>
   </div>
 
   <div class="hud-todo-stats-row">
@@ -593,7 +591,7 @@
     <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
     <div class="hud-todo-sphere-pick">
       <div class="hud-todo-sphere s-high active" id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
-      <div class="hud-todo-sphere s-med"         id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
+      <div class="hud-todo-sphere s-med"         id="ht-sp-med"  onclick="selectPrio('med')"  title="Normal"></div>
       <div class="hud-todo-sphere s-low"         id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
     </div>
     <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
@@ -611,34 +609,11 @@
   <div id="ht-list"></div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAqg5N12AUBXn9ZEzfPSw6pcBwPABqq6jw",
-    authDomain: "hud-todo.firebaseapp.com",
-    projectId: "hud-todo",
-    storageBucket: "hud-todo.firebasestorage.app",
-    messagingSenderId: "265738110346",
-    appId: "1:265738110346:web:faae50b708bc5fc4303473"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-
-  let tasks      = [];
+<script>
+  let tasks = [];
   let categories = [];
   let currentPrio = 'high';
-  let filterCat   = 'all';
-
-  // Sync indicator
-  function setSync(state, label) {
-    const dot = document.getElementById('ht-sync-dot');
-    const lbl = document.getElementById('ht-sync-label');
-    dot.className = 'hud-todo-sync-dot ' + state;
-    lbl.textContent = label;
-  }
+  let filterCat = 'all';
 
   // Clock
   function updateClock() {
@@ -650,6 +625,18 @@
   setInterval(updateClock, 1000);
   updateClock();
 
+  // Storage
+  function load() {
+    try { const r = localStorage.getItem('hud_tasks_v3'); if (r) tasks = JSON.parse(r); } catch(e) { tasks = []; }
+    try { const r = localStorage.getItem('hud_cats_v3'); if (r) categories = JSON.parse(r); } catch(e) { categories = []; }
+    renderCatSelect();
+    render();
+  }
+  function save() {
+    try { localStorage.setItem('hud_tasks_v3', JSON.stringify(tasks)); } catch(e) {}
+    try { localStorage.setItem('hud_cats_v3', JSON.stringify(categories)); } catch(e) {}
+  }
+
   // Priority
   function selectPrio(p) {
     currentPrio = p;
@@ -657,7 +644,6 @@
       document.getElementById('ht-sp-' + x).className = 'hud-todo-sphere s-' + x + (x === p ? ' active' : '');
     });
   }
-  window.selectPrio = selectPrio;
 
   // Modal
   function openModal() {
@@ -668,22 +654,17 @@
     document.getElementById('ht-modal').classList.remove('open');
     document.getElementById('ht-cat-inp').value = '';
   }
-  async function confirmAddCategory() {
+  function confirmAddCategory() {
     const name = document.getElementById('ht-cat-inp').value.trim();
     if (!name) return;
     if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) { closeModal(); return; }
-    setSync('syncing', 'WRITING...');
-    try {
-      await addDoc(collection(db, 'categories'), { name, order: Date.now() });
-      setSync('synced', 'SYNCED');
-    } catch(e) { setSync('error', 'ERROR'); }
+    categories.push({ id: String(Date.now()), name });
+    save();
+    renderCatSelect();
     closeModal();
   }
   document.getElementById('ht-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
   document.getElementById('ht-cat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddCategory(); if (e.key === 'Escape') closeModal(); });
-  window.openModal = openModal;
-  window.closeModal = closeModal;
-  window.confirmAddCategory = confirmAddCategory;
 
   // Filters
   function setCatFilter(c) {
@@ -691,13 +672,12 @@
     document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === c));
     render();
   }
-  window.setCatFilter = setCatFilter;
 
   function getFilteredTasks() {
     return tasks.filter(t => filterCat === 'all' || t.cat === filterCat);
   }
 
-  // Category select + filter buttons
+  // Category select
   function renderCatSelect() {
     const sel = document.getElementById('ht-cat-sel');
     const prev = sel.value;
@@ -705,87 +685,63 @@
       categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     if (prev) sel.value = prev;
 
-    document.getElementById('ht-cat-filters').innerHTML = categories.map(c =>
+    const catFilters = document.getElementById('ht-cat-filters');
+    catFilters.innerHTML = categories.map(c =>
       `<button class="hud-todo-filter-btn${filterCat === c.id ? ' active' : ''}" data-cat="${c.id}" onclick="setCatFilter('${c.id}')">${c.name}</button>`
     ).join('');
   }
 
-  async function delCategory(id) {
-    setSync('syncing', 'WRITING...');
-    try {
-      await deleteDoc(doc(db, 'categories', id));
-      const toUpdate = tasks.filter(t => t.cat === id);
-      for (const t of toUpdate) await updateDoc(doc(db, 'tasks', t.id), { cat: '' });
-      if (filterCat === id) { filterCat = 'all'; document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all')); }
-      setSync('synced', 'SYNCED');
-    } catch(e) { setSync('error', 'ERROR'); }
+  function delCategory(id) {
+    categories = categories.filter(c => c.id !== String(id));
+    tasks = tasks.map(t => t.cat === String(id) ? { ...t, cat: '' } : t);
+    if (filterCat === String(id)) { filterCat = 'all'; document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all')); }
+    save();
+    renderCatSelect();
+    render();
   }
-  window.delCategory = delCategory;
 
   // Tasks
-  async function addTask() {
-    const inp  = document.getElementById('ht-inp');
+  function addTask() {
+    const inp = document.getElementById('ht-inp');
     const text = inp.value.trim();
     if (!text) return;
     const catId = document.getElementById('ht-cat-sel').value;
-    setSync('syncing', 'WRITING...');
-    try {
-      await addDoc(collection(db, 'tasks'), {
-        text,
-        prio: currentPrio,
-        done: false,
-        cat: catId,
-        createdAt: Date.now()
-      });
-      inp.value = '';
-      setSync('synced', 'SYNCED');
-    } catch(e) { setSync('error', 'ERROR'); }
+    tasks.unshift({ id: Date.now(), text, prio: currentPrio, done: false, cat: String(catId) });
+    inp.value = '';
+    save(); render();
   }
-  window.addTask = addTask;
 
-  async function toggle(id) {
-    const t = tasks.find(t => t.id === id);
-    if (!t) return;
-    setSync('syncing', 'WRITING...');
-    try {
-      await updateDoc(doc(db, 'tasks', id), { done: !t.done });
-      setSync('synced', 'SYNCED');
-    } catch(e) { setSync('error', 'ERROR'); }
-  }
-  window.toggle = toggle;
-
-  async function del(id) {
-    setSync('syncing', 'WRITING...');
-    try {
-      await deleteDoc(doc(db, 'tasks', id));
-      setSync('synced', 'SYNCED');
-    } catch(e) { setSync('error', 'ERROR'); }
-  }
-  window.del = del;
+  function toggle(id) { const t = tasks.find(t => t.id === id); if (t) { t.done = !t.done; save(); render(); } }
+  function del(id) { tasks = tasks.filter(t => t.id !== id); save(); render(); }
 
   function taskHTML(t) {
     return `<div class="hud-todo-task-item prio-${t.prio}${t.done ? ' done' : ''}">
-      <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
+      <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle(${t.id})" />
       <div class="hud-todo-task-sphere ${t.prio}"></div>
       <span class="hud-todo-task-text">${t.text}</span>
-      <button class="hud-todo-del-btn" onclick="del('${t.id}')">✕</button>
+      <button class="hud-todo-del-btn" onclick="del(${t.id})">✕</button>
     </div>`;
   }
 
   function render() {
     const filtered = getFilteredTasks();
     const done = tasks.filter(t => t.done).length;
-    const pct  = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-    document.getElementById('ht-total').textContent  = tasks.length;
-    document.getElementById('ht-done').textContent   = done;
+    const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+    document.getElementById('ht-total').textContent = tasks.length;
+    document.getElementById('ht-done').textContent = done;
     document.getElementById('ht-remain').textContent = tasks.length - done;
     document.getElementById('ht-progress').style.width = pct + '%';
     document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
 
     const list = document.getElementById('ht-list');
-    if (!filtered.length) { list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>'; return; }
+
+    if (!filtered.length) {
+      list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
+      return;
+    }
 
     let html = '';
+
     categories.forEach(cat => {
       const catTasks = filtered.filter(t => t.cat === cat.id);
       if (!catTasks.length) return;
@@ -794,7 +750,7 @@
         <div class="hud-todo-cat-header">
           <span class="hud-todo-cat-name">◈ ${cat.name}</span>
           <span class="hud-todo-cat-count">${catDone}/${catTasks.length}</span>
-          <button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>
+          <button class="hud-todo-cat-del" onclick="delCategory(${cat.id})" title="Supprimer catégorie">✕ suppr.</button>
         </div>
         <div class="hud-todo-task-list">${catTasks.map(taskHTML).join('')}</div>
       </div>`;
@@ -810,27 +766,12 @@
         <div class="hud-todo-task-list">${uncatTasks.map(taskHTML).join('')}</div>
       </div>`;
     }
+
     list.innerHTML = html;
   }
 
-  // Realtime listeners
-  setSync('syncing', 'CONNECTING...');
-
-  onSnapshot(collection(db, 'categories'), snap => {
-    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-    renderCatSelect();
-    render();
-  }, () => setSync('error', 'ERROR'));
-
-  onSnapshot(collection(db, 'tasks'), snap => {
-    tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    render();
-    setSync('synced', 'SYNCED');
-  }, () => setSync('error', 'ERROR'));
-
   document.getElementById('ht-inp').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+  load();
 </script>
 </body>
 </html>
