@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v3.0 — 2026-03-28 -->
+<!-- HUD TODO — v4.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v3.0</title>
+<title>HUD Task Manager v4.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -510,6 +510,44 @@
     .hud-todo-input-zone { flex-wrap: wrap; }
     .hud-todo-cat-select { min-width: 120px; }
   }
+
+  /* Filter bar */
+  .hud-todo-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hud-todo-filter-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--ht-text-dim);
+    text-transform: uppercase;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn {
+    background: transparent;
+    border: 1px solid rgba(0,245,255,0.2);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-mono);
+    font-size: 13px;
+    padding: 4px 14px;
+    height: 30px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn:hover { border-color: var(--ht-cyan-mid); color: var(--ht-text); }
+  .hud-todo-filter-btn.active {
+    border-color: var(--ht-cyan);
+    color: var(--ht-cyan);
+    background: var(--ht-cyan-glow);
+    box-shadow: 0 0 8px var(--ht-cyan-dim);
+  }
+  .hud-todo-filter-sep { width: 1px; height: 20px; background: var(--ht-cyan-mid); flex-shrink: 0; margin: 0 4px; }
 </style>
 </head>
 <body>
@@ -552,7 +590,7 @@
     <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
     <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
     <div class="hud-todo-sphere-pick">
-      <div class="hud-todo-sphere s-high active" id="ht-sp-high" onclick="selectPrio('high')" title="Critique"></div>
+      <div class="hud-todo-sphere s-high active" id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
       <div class="hud-todo-sphere s-med"         id="ht-sp-med"  onclick="selectPrio('med')"  title="Normal"></div>
       <div class="hud-todo-sphere s-low"         id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
     </div>
@@ -560,6 +598,12 @@
   </div>
 
   <button class="hud-todo-btn-cat" onclick="openModal()">+ Add category</button>
+
+  <div class="hud-todo-filter-bar" id="ht-filters">
+    <span class="hud-todo-filter-label">Filtres</span>
+    <button class="hud-todo-filter-btn active" data-cat="all" onclick="setCatFilter('all')">Toutes catégories</button>
+    <div id="ht-cat-filters"></div>
+  </div>
 
   <div class="hud-todo-section-label">Directives actives</div>
   <div id="ht-list"></div>
@@ -569,6 +613,7 @@
   let tasks = [];
   let categories = [];
   let currentPrio = 'high';
+  let filterCat = 'all';
 
   // Clock
   function updateClock() {
@@ -621,6 +666,17 @@
   document.getElementById('ht-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
   document.getElementById('ht-cat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddCategory(); if (e.key === 'Escape') closeModal(); });
 
+  // Filters
+  function setCatFilter(c) {
+    filterCat = c;
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === c));
+    render();
+  }
+
+  function getFilteredTasks() {
+    return tasks.filter(t => filterCat === 'all' || t.cat === filterCat);
+  }
+
   // Category select
   function renderCatSelect() {
     const sel = document.getElementById('ht-cat-sel');
@@ -628,11 +684,17 @@
     sel.innerHTML = '<option value="">— Catégorie —</option>' +
       categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     if (prev) sel.value = prev;
+
+    const catFilters = document.getElementById('ht-cat-filters');
+    catFilters.innerHTML = categories.map(c =>
+      `<button class="hud-todo-filter-btn${filterCat === c.id ? ' active' : ''}" data-cat="${c.id}" onclick="setCatFilter('${c.id}')">${c.name}</button>`
+    ).join('');
   }
 
   function delCategory(id) {
-    categories = categories.filter(c => c.id !== id);
+    categories = categories.filter(c => c.id !== String(id));
     tasks = tasks.map(t => t.cat === String(id) ? { ...t, cat: '' } : t);
+    if (filterCat === String(id)) { filterCat = 'all'; document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all')); }
     save();
     renderCatSelect();
     render();
@@ -662,6 +724,7 @@
   }
 
   function render() {
+    const filtered = getFilteredTasks();
     const done = tasks.filter(t => t.done).length;
     const pct = tasks.length ? Math.round(done / tasks.length * 100) : 0;
     document.getElementById('ht-total').textContent = tasks.length;
@@ -672,16 +735,15 @@
 
     const list = document.getElementById('ht-list');
 
-    if (!tasks.length) {
+    if (!filtered.length) {
       list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
       return;
     }
 
     let html = '';
 
-    // Blocks par catégorie
     categories.forEach(cat => {
-      const catTasks = tasks.filter(t => t.cat === cat.id);
+      const catTasks = filtered.filter(t => t.cat === cat.id);
       if (!catTasks.length) return;
       const catDone = catTasks.filter(t => t.done).length;
       html += `<div class="hud-todo-cat-block">
@@ -694,8 +756,7 @@
       </div>`;
     });
 
-    // Bloc sans catégorie
-    const uncatTasks = tasks.filter(t => !t.cat || t.cat === '');
+    const uncatTasks = filtered.filter(t => !t.cat || t.cat === '');
     if (uncatTasks.length) {
       html += `<div class="hud-todo-cat-block">
         <div class="hud-todo-cat-header">
