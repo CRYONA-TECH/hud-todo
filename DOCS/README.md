@@ -1,44 +1,69 @@
 # HUD TODO
 
-Tactical task manager — interface sci-fi HUD style, cyan, standalone HTML.
+Tactical task manager — interface sci-fi HUD style, cyan, sync multi-appareils.
 
 ## Stack
 
-- HTML / CSS / JS vanilla — aucune dépendance
-- Stockage : `localStorage` (standalone) / `window.storage` (claude.ai)
+- HTML / CSS / JS vanilla — aucune dépendance npm
+- **Firebase Firestore** — base de données cloud temps réel (sync PC ↔ mobile)
 - Polices : Orbitron + Share Tech Mono (Google Fonts)
+
+## Firebase
+
+**Firebase** est une plateforme cloud de Google qui fournit des services backend sans serveur.
+
+**Firestore** est sa base de données NoSQL temps réel : les données sont stockées dans le cloud et synchronisées instantanément sur tous les appareils connectés. Chaque modification (ajout, suppression, validation d'une tâche) est propagée en temps réel sans rechargement de page.
+
+**Pourquoi Firebase pour ce projet :**
+- Aucun serveur à gérer
+- Sync automatique PC ↔ mobile
+- Plan gratuit largement suffisant pour un usage personnel (50 000 lectures/jour, 20 000 écritures/jour)
+- Intégration directe en HTML vanilla via CDN — pas de npm requis
+
+**Projet Firebase :** `hud-todo` — console : https://console.firebase.google.com
 
 ## Structure
 
 ```
 HUD TODO/
-├── DEPLOY/          ← version en ligne (GitHub Pages)
+├── .github/
+│   └── workflows/
+│       └── deploy.yml       ← GitHub Action auto-deploy
+├── ARCHIVE/                 ← versions datées — jamais modifiées
+├── DEPLOY/                  ← version en ligne (GitHub Pages)
 │   └── index.html
-├── ARCHIVE/         ← versions datées — jamais modifiées
 ├── DOCS/
 │   ├── README.md
 │   ├── changelog.md
-│   └── TODO.md
-└── SRC/             ← fichier de travail actif
-    └── hud_todo_v1.html
+│   ├── TODO.md
+│   └── archi_hud_todo.svg
+├── SRC/                     ← fichier de travail actif (dernière version uniquement)
+│   └── hud_todo_v6.html
+└── deploy.bat               ← copie SRC → DEPLOY + archivage automatique
 ```
 
 ## Déploiement
 
-1. Modifier `SRC/hud_todo_vX.html`
-2. Copier vers `DEPLOY/index.html`
-3. Archiver l'ancienne version dans `ARCHIVE/YYYY-MM-DD_vX.html`
-4. Commit + push → GitHub Pages publie automatiquement
+```bash
+# 1. Modifier SRC/hud_todo_vX.html
+# 2. Déplacer l'ancienne version dans ARCHIVE/
+# 3. Lancer deploy.bat (copie vers DEPLOY/index.html)
+# 4. Push vers GitHub → Action déclenche le deploy automatique
+git add .
+git commit -m "feat: description"
+git push
+```
 
 ## URL
 
-`https://[pseudo].github.io/hud-todo/`
+`https://cryona-tech.github.io/hud-todo/`
 
-## Fonctionnalités v1
+## Fonctionnalités actuelles
 
-- Ajout / suppression de tâches
-- Priorité via sphères 3D rouge / orange / vert
-- Barre de progression + compteurs
+- Ajout / suppression / validation de tâches
+- Priorités via sphères 3D (vert Basse / orange Normale / rouge Haute)
+- Catégories avec filtres
+- Barre de progression + compteurs globaux
 - Horloge temps réel
-- Scan line animée, style HUD cyan
-- Persistance `localStorage`
+- Sync temps réel Firebase Firestore (PC ↔ mobile)
+- Indicateur de statut sync dans le header
