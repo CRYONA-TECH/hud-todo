@@ -1,5 +1,13 @@
 # Changelog
 
+## v9.0 — 2026-03-28
+
+- Ajout favicon `HUD.ico` dans `DEPLOY/`
+- Lien favicon dans `<head>` : `<link rel="icon" type="image/x-icon" href="HUD.ico" />`
+- Modification `deploy.yml` pour copier `HUD.ico` vers branche `gh-pages`
+
+---
+
 ## v8.0 — 2026-03-28
 
 - Firebase Auth Google intégré
