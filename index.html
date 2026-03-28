@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v6.0 — 2026-03-28 -->
+<!-- HUD TODO — v7.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v6.0</title>
+<title>HUD Task Manager v7.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -592,9 +592,9 @@
     <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
     <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
     <div class="hud-todo-sphere-pick">
-      <div class="hud-todo-sphere s-low"         id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
-      <div class="hud-todo-sphere s-med"         id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
-      <div class="hud-todo-sphere s-high active" id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
+      <div class="hud-todo-sphere s-low active"  id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
+      <div class="hud-todo-sphere s-med"          id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
+      <div class="hud-todo-sphere s-high"         id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
     </div>
     <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
   </div>
@@ -629,7 +629,7 @@
 
   let tasks      = [];
   let categories = [];
-  let currentPrio = 'high';
+  let currentPrio = 'low';
   let filterCat   = 'all';
 
   // Sync indicator
