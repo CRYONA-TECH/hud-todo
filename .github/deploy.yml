@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'SRC/hud_todo_v*.html'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Find latest version
+        id: find
+        run: |
+          LATEST=$(ls SRC/hud_todo_v*.html | sort -V | tail -1)
+          echo "file=$LATEST" >> $GITHUB_OUTPUT
+
+      - name: Prepare gh-pages
+        run: |
+          mkdir -p gh-pages
+          cp "${{ steps.find.outputs.file }}" gh-pages/index.html
+
+      - name: Push to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          publish_branch: gh-pages
+          commit_message: "deploy: $(basename ${{ steps.find.outputs.file }})"
