@@ -1,94 +1,91 @@
 # Changelog
 
+## v14.0 — 2026-04-04
+
+- PWA : ajout `manifest.json` + service worker `sw.js`
+- Icônes PNG 192x192 et 512x512 pour installation mobile
+- Lien manifest + enregistrement service worker dans `<head>`
+- `deploy.yml` mis à jour pour copier `manifest.json`, `sw.js`, `HUD-192.png`, `HUD-512.png` vers `gh-pages`
+- Installation PWA validée sur Samsung Internet (plein écran, icône HUD)
+
+---
+
 ## v13.0 — 2026-03-28
 
 - Drag & drop des tâches au sein d'une catégorie (handle `⠿`, SortableJS)
-- Drag & drop des blocs de catégorie (handle `⠿` dans le header)
-- Ordre sauvegardé dans Firestore après chaque drop (champ `order`)
-- Tâches triées par `order` en priorité, `createdAt` en fallback
-- Panel "Tasks Completed" non draggable (lecture seule)
+- Drag & drop des blocs de catégorie
+- Ordre sauvegardé dans Firestore (champ `order`)
+- Panel "Tasks Completed" non draggable
 
 ---
 
 ## v12.0 — 2026-03-28
 
-- Fix : `currentPrio` et `filterCat` déclarés au bon endroit (ReferenceError corrigé)
-- Icône `✎` pour éditer le nom d'une tâche (prompt natif + update Firestore)
-- Icône `✎` pour éditer le nom d'une catégorie (prompt natif + update Firestore)
+- Icône `✎` pour éditer le nom d'une tâche
+- Icône `✎` pour éditer le nom d'une catégorie
+- Fix : `currentPrio` et `filterCat` déclarés au bon endroit
 
 ---
 
 ## v11.0 — 2026-03-28
 
-- Fix déclaration variables `currentPrio` / `filterCat` (résolution ReferenceError)
+- Fix déclaration variables `currentPrio` / `filterCat`
 
 ---
 
 ## v10.0 — 2026-03-28
 
 - Deux onglets HUD : `◈ TACTICAL TASK MANAGER` / `◈ TASKS COMPLETED`
-- Tâches actives et accomplies séparées dans deux panneaux distincts
-- Même structure par blocs catégorie dans les deux panneaux
+- Tâches actives et accomplies séparées
 - Compteurs `X/Y` supprimés des headers catégorie
-- Bouton `✕ suppr.` uniquement dans le panneau actif
 
 ---
 
 ## v9.0 — 2026-03-28
 
-- Favicon `HUD.ico` dans l'onglet navigateur
-- Modification `deploy.yml` pour copier `HUD.ico` vers branche `gh-pages`
+- Favicon `HUD.ico` + `deploy.yml` mis à jour
 
 ---
 
 ## v8.0 — 2026-03-28
 
-- Firebase Auth Google intégré
-- Bouton `⬡ Sign in` dans le header (masqué après connexion)
-- Reconnexion automatique après premier login
-- Règles Firestore en mode production (UID unique autorisé)
-- Domaine `cryona-tech.github.io` ajouté aux domaines autorisés Firebase
+- Firebase Auth Google + mode production Firestore
 
 ---
 
 ## v7.0 — 2026-03-28
 
-- Priorité par défaut : `low` (sphère verte active au chargement)
+- Priorité par défaut : Basse (sphère verte)
 
 ---
 
 ## v6.0 — 2026-03-28
 
-- Ordre des sphères inversé : vert (Basse) → orange (Normale) → rouge (Haute)
+- Ordre sphères inversé : vert → orange → rouge
 
 ---
 
 ## v5.0 — 2026-03-28
 
-- Remplacement de `localStorage` par Firebase Firestore
-- Sync temps réel PC ↔ mobile via `onSnapshot`
-- Indicateur de statut sync dans le header
+- Firebase Firestore sync temps réel PC ↔ mobile
 
 ---
 
 ## v4.0 — 2026-03-28
 
-- Filtres par catégorie (boutons toggle)
-- Suppression filtres priorité
+- Filtres par catégorie
 
 ---
 
 ## v3.0 — 2026-03-28
 
-- Système de catégories avec modale HUD
-- Tâches classées par blocs de catégorie
-- Fix compteur missions
+- Système de catégories
 
 ---
 
 ## v2.0 — 2026-03-28
 
-- Fond bleu nuit, largeur 80%, tailles en px, préfixes CSS `hud-todo-`
+- Fond bleu nuit, largeur 80%, px, préfixes CSS
 
 ---
 
