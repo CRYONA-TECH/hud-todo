@@ -25,13 +25,9 @@ if "%LATEST%"=="" (
 
 echo [SRC]    %LATEST%
 
-:: Archive current DEPLOY/index.html if it exists
-if exist "%DEPLOY%\index.html" (
-    for /f "tokens=1-3 delims=-" %%a in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set "TODAY=%%a-%%b-%%c"
-    set "ARCHIVE_NAME=%ARCHIVE%\!TODAY!_v%LATEST_VER%.html"
-    copy /Y "%DEPLOY%\index.html" "!ARCHIVE_NAME!" >nul
-    echo [ARCHIVE] !ARCHIVE_NAME!
-)
+:: Archive SRC file with original name
+copy /Y "%LATEST%" "%ARCHIVE%\!FNAME!.html" >nul
+echo [ARCHIVE] %ARCHIVE%\!FNAME!.html
 
 :: Copy to DEPLOY/index.html
 copy /Y "%LATEST%" "%DEPLOY%\index.html" >nul

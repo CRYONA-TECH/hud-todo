@@ -19,3 +19,4 @@
 - [x] v11/v12 : édition tâches et catégories — 2026-03-28
 - [x] v13 : drag & drop tâches + catégories (SortableJS) — 2026-03-28
 - [x] v14 : PWA installable — 2026-04-04
+- [x] v14.1 : deploy.bat archivage nom original — 2026-04-04

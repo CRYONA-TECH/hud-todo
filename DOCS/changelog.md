@@ -1,5 +1,11 @@
 # Changelog
 
+## v14.1 — 2026-04-04
+
+- `deploy.bat` : archivage avec nom original (`hud_todo_vX.html`) au lieu de `YYYY-MM-DD_vX.html`
+
+---
+
 ## v14.0 — 2026-04-04
 
 - PWA : ajout `manifest.json` + service worker `sw.js`

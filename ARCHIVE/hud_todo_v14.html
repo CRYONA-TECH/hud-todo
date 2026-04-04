@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<!-- HUD TODO — v14.0 — 2026-03-28 -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HUD Task Manager v14.0</title>
+<link rel="icon" type="image/x-icon" href="HUD.ico" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#00f5ff" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<style>
+  :root {
+    --ht-cyan: #00f5ff;
+    --ht-cyan-dim: rgba(0,245,255,0.15);
+    --ht-cyan-mid: rgba(0,245,255,0.4);
+    --ht-cyan-glow: rgba(0,245,255,0.08);
+    --ht-red: #ff3c3c;
+    --ht-amber: #ff8c00;
+    --ht-green: #39ff85;
+    --ht-bg: #020818;
+    --ht-bg2: #030d24;
+    --ht-text: #a0c8f0;
+    --ht-text-dim: rgba(160,200,240,0.45);
+    --ht-mono: 'Share Tech Mono', monospace;
+    --ht-head: 'Orbitron', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--ht-bg);
+    min-height: 100vh;
+    padding: 32px 10%;
+  }
+
+  .hud-todo-wrap {
+    width: 100%;
+    background: var(--ht-bg);
+    color: var(--ht-text);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 28px;
+    position: relative;
+    border: 1px solid var(--ht-cyan-mid);
+    box-shadow: 0 0 40px rgba(0,100,255,0.08), inset 0 0 60px rgba(0,80,200,0.03);
+    overflow: hidden;
+  }
+
+  .hud-todo-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,100,255,0.012) 2px, rgba(0,100,255,0.012) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hud-todo-wrap > * { position: relative; z-index: 1; }
+
+  .hud-todo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ht-cyan-mid);
+    position: relative;
+  }
+  .hud-todo-header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0;
+    width: 40%; height: 1px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 8px var(--ht-cyan);
+  }
+
+  .hud-todo-title {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+  }
+  .hud-todo-id {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+  }
+
+  .hud-todo-status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ht-green);
+    box-shadow: 0 0 10px var(--ht-green);
+    display: inline-block;
+    margin-right: 8px;
+    animation: ht-pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes ht-pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .hud-todo-sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    background: var(--ht-text-dim);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .hud-todo-sync-dot.syncing { background: var(--ht-amber); box-shadow: 0 0 8px var(--ht-amber); animation: ht-pulse-dot 0.8s ease-in-out infinite; }
+  .hud-todo-sync-dot.synced  { background: var(--ht-green); box-shadow: 0 0 8px var(--ht-green); }
+  .hud-todo-sync-dot.error   { background: var(--ht-red); box-shadow: 0 0 8px var(--ht-red); }
+
+  .hud-todo-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .hud-todo-stat-box {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    padding: 10px 14px;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  }
+  .hud-todo-stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 6px var(--ht-cyan);
+  }
+  .hud-todo-stat-n {
+    font-family: var(--ht-head);
+    font-size: 28px;
+    color: var(--ht-cyan);
+    line-height: 1;
+    text-shadow: 0 0 12px var(--ht-cyan);
+  }
+  .hud-todo-stat-l {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .hud-todo-input-zone {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+
+  .hud-todo-input {
+    flex: 1;
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-cyan);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 10px 16px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 46px;
+  }
+  .hud-todo-input::placeholder { color: var(--ht-text-dim); }
+  .hud-todo-input:focus {
+    border-color: var(--ht-cyan);
+    box-shadow: 0 0 12px var(--ht-cyan-dim), inset 0 0 8px var(--ht-cyan-glow);
+  }
+
+  .hud-todo-cat-select {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-text);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 0 12px;
+    height: 46px;
+    outline: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+    min-width: 160px;
+  }
+  .hud-todo-cat-select:focus { border-color: var(--ht-cyan); }
+  .hud-todo-cat-select option { background: var(--ht-bg2); color: var(--ht-text); }
+
+  .hud-todo-sphere-pick { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  .hud-todo-sphere {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+  }
+  .hud-todo-sphere::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 4px;
+    width: 6px; height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+  }
+  .hud-todo-sphere:hover { transform: scale(1.2); }
+  .hud-todo-sphere.s-high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 6px rgba(255,60,60,0.6); }
+  .hud-todo-sphere.s-med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 6px rgba(255,140,0,0.6); }
+  .hud-todo-sphere.s-low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 6px rgba(57,255,133,0.6); }
+  .hud-todo-sphere.active.s-high { border-color: var(--ht-red); box-shadow: 0 0 12px rgba(255,60,60,0.9), 0 0 20px rgba(255,60,60,0.4); transform: scale(1.25); }
+  .hud-todo-sphere.active.s-med  { border-color: var(--ht-amber); box-shadow: 0 0 12px rgba(255,140,0,0.9), 0 0 20px rgba(255,140,0,0.4); transform: scale(1.25); }
+  .hud-todo-sphere.active.s-low  { border-color: var(--ht-green); box-shadow: 0 0 12px rgba(57,255,133,0.9), 0 0 20px rgba(57,255,133,0.4); transform: scale(1.25); }
+
+  .hud-todo-btn {
+    background: transparent;
+    border: 1px solid var(--ht-cyan);
+    color: var(--ht-cyan);
+    font-family: var(--ht-head);
+    font-size: 16px;
+    padding: 0 20px;
+    height: 46px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .hud-todo-btn::before { content:''; position:absolute; inset:0; background:var(--ht-cyan-dim); opacity:0; transition:opacity 0.15s; }
+  .hud-todo-btn:hover::before { opacity:1; }
+  .hud-todo-btn:hover { box-shadow: 0 0 16px var(--ht-cyan-dim); }
+  .hud-todo-btn:active { transform: scale(0.97); }
+
+  .hud-todo-btn-cat {
+    background: transparent;
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-head);
+    font-size: 13px;
+    padding: 0 16px;
+    height: 36px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-bottom: 20px;
+  }
+  .hud-todo-btn-cat:hover { border-color: var(--ht-cyan); color: var(--ht-cyan); box-shadow: 0 0 10px var(--ht-cyan-dim); }
+  .hud-todo-btn-cat:active { transform: scale(0.97); }
+
+  .hud-todo-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2,8,24,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .hud-todo-modal-overlay.open { display: flex; }
+
+  .hud-todo-modal {
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    padding: 28px;
+    width: 400px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,245,255,0.1);
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  }
+  .hud-todo-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 8px var(--ht-cyan);
+  }
+
+  .hud-todo-modal-title {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hud-todo-modal-input {
+    width: 100%;
+    background: var(--ht-bg);
+    border: 1px solid var(--ht-cyan-mid);
+    color: var(--ht-cyan);
+    font-family: var(--ht-mono);
+    font-size: 16px;
+    padding: 10px 16px;
+    outline: none;
+    letter-spacing: 1px;
+    height: 46px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .hud-todo-modal-input:focus { border-color: var(--ht-cyan); box-shadow: 0 0 12px var(--ht-cyan-dim); }
+  .hud-todo-modal-input::placeholder { color: var(--ht-text-dim); }
+
+  .hud-todo-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  .hud-todo-modal-cancel {
+    background: transparent;
+    border: 1px solid var(--ht-text-dim);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-head);
+    font-size: 13px;
+    padding: 0 16px;
+    height: 38px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .hud-todo-modal-cancel:hover { border-color: var(--ht-text); color: var(--ht-text); }
+
+  .hud-todo-section-label {
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hud-todo-section-label::after { content:''; flex:1; height:1px; background:linear-gradient(to right, var(--ht-cyan-mid), transparent); }
+
+  .hud-todo-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .hud-todo-filter-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--ht-text-dim);
+    text-transform: uppercase;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn {
+    background: transparent;
+    border: 1px solid rgba(0,245,255,0.2);
+    color: var(--ht-text-dim);
+    font-family: var(--ht-mono);
+    font-size: 13px;
+    padding: 4px 14px;
+    height: 30px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .hud-todo-filter-btn:hover { border-color: var(--ht-cyan-mid); color: var(--ht-text); }
+  .hud-todo-filter-btn.active {
+    border-color: var(--ht-cyan);
+    color: var(--ht-cyan);
+    background: var(--ht-cyan-glow);
+    box-shadow: 0 0 8px var(--ht-cyan-dim);
+  }
+
+  .hud-todo-cat-block { margin-bottom: 28px; }
+
+  .hud-todo-cat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(0,245,255,0.15);
+  }
+  .hud-todo-cat-name {
+    font-family: var(--ht-head);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--ht-cyan);
+    text-transform: uppercase;
+  }
+  .hud-todo-cat-count { font-size: 13px; color: var(--ht-text-dim); letter-spacing: 1px; }
+  .hud-todo-cat-del {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: rgba(255,60,60,0.3);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--ht-mono);
+    transition: color 0.15s;
+    padding: 0 4px;
+    letter-spacing: 1px;
+  }
+  .hud-todo-cat-del:hover { color: var(--ht-red); }
+
+  .hud-todo-task-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .hud-todo-task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--ht-bg2);
+    border: 1px solid rgba(0,100,255,0.12);
+    border-left: 2px solid var(--ht-cyan);
+    transition: all 0.2s;
+    animation: ht-slide-in 0.25s ease;
+  }
+  @keyframes ht-slide-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+  .hud-todo-task-item:hover { border-color: var(--ht-cyan-mid); background: rgba(0,100,255,0.04); }
+  .hud-todo-task-item.done { border-left-color: rgba(0,100,255,0.2); opacity: 0.45; }
+  .hud-todo-task-item.done .hud-todo-task-text { text-decoration: line-through; color: var(--ht-text-dim); }
+  .hud-todo-task-item.prio-high { border-left-color: var(--ht-red); }
+  .hud-todo-task-item.prio-high:not(.done) { background: rgba(255,60,60,0.03); }
+  .hud-todo-task-item.prio-low { border-left-color: rgba(57,255,133,0.5); }
+  .hud-todo-task-item.prio-med { border-left-color: var(--ht-amber); }
+
+  .hud-todo-check {
+    appearance: none;
+    width: 16px; height: 16px;
+    border: 1px solid var(--ht-cyan-mid);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .hud-todo-check:checked { background: var(--ht-cyan-dim); border-color: var(--ht-cyan); }
+  .hud-todo-check:checked::after { content:'✓'; position:absolute; top:-2px; left:2px; font-size:13px; color:var(--ht-cyan); }
+
+  .hud-todo-task-text { flex: 1; font-size: 16px; letter-spacing: 0.5px; color: var(--ht-text); }
+
+  .hud-todo-task-sphere {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .hud-todo-task-sphere::after { content:''; position:absolute; top:2px; left:2px; width:4px; height:3px; border-radius:50%; background:rgba(255,255,255,0.35); }
+  .hud-todo-task-sphere.high { background: radial-gradient(circle at 35% 35%, #ff7070, #ff3c3c, #8b0000); box-shadow: 0 0 4px rgba(255,60,60,0.7); }
+  .hud-todo-task-sphere.med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 4px rgba(255,140,0,0.7); }
+  .hud-todo-task-sphere.low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 4px rgba(57,255,133,0.7); }
+
+  .hud-todo-drag-handle {
+    color: var(--ht-text-dim);
+    cursor: grab;
+    font-size: 14px;
+    padding: 0 6px 0 0;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+    user-select: none;
+  }
+  .hud-todo-drag-handle:hover { opacity: 1; color: var(--ht-cyan); }
+  .hud-todo-cat-block { cursor: default; }
+  .hud-todo-cat-drag { cursor: grab; color: var(--ht-text-dim); font-size: 13px; opacity: 0.4; transition: opacity 0.15s; margin-right: 8px; user-select: none; }
+  .hud-todo-cat-drag:hover { opacity: 1; color: var(--ht-cyan); }
+  .sortable-ghost { opacity: 0.3; background: var(--ht-cyan-glow) !important; border-color: var(--ht-cyan) !important; }
+  .sortable-chosen { box-shadow: 0 0 16px var(--ht-cyan-dim); }
+
+  .hud-todo-edit-btn {
+    background: none;
+    border: none;
+    color: rgba(160,200,240,0.3);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    transition: color 0.15s;
+    font-family: var(--ht-mono);
+    flex-shrink: 0;
+  }
+  .hud-todo-edit-btn:hover { color: var(--ht-cyan); }
+
+  .hud-todo-del-btn {
+    background: none;
+    border: none;
+    color: rgba(255,60,60,0.4);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    transition: color 0.15s;
+    font-family: var(--ht-mono);
+    flex-shrink: 0;
+  }
+  .hud-todo-del-btn:hover { color: var(--ht-red); }
+
+  .hud-todo-empty-state {
+    text-align: center;
+    color: var(--ht-text-dim);
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 48px 0;
+    text-transform: uppercase;
+  }
+  .hud-todo-empty-state::before {
+    display: block;
+    content: '[ AUCUNE TÂCHE ACTIVE ]';
+    color: var(--ht-cyan-mid);
+    margin-bottom: 6px;
+    font-family: var(--ht-head);
+    font-size: 16px;
+  }
+
+  .hud-todo-corner-tl,
+  .hud-todo-corner-br { position:absolute; width:14px; height:14px; pointer-events:none; }
+  .hud-todo-corner-tl { top:0; left:0; border-top:2px solid var(--ht-cyan); border-left:2px solid var(--ht-cyan); }
+  .hud-todo-corner-br { bottom:0; right:0; border-bottom:2px solid var(--ht-cyan); border-right:2px solid var(--ht-cyan); }
+
+  .hud-todo-progress-wrap {
+    margin-bottom: 6px;
+    background: var(--ht-bg2);
+    border: 1px solid var(--ht-cyan-mid);
+    height: 4px;
+    position: relative;
+    overflow: visible;
+  }
+  .hud-todo-progress-bar {
+    height: 100%;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 10px var(--ht-cyan);
+    transition: width 0.4s ease;
+    position: relative;
+  }
+  .hud-todo-progress-bar::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -2px;
+    width: 1px; height: 8px;
+    background: var(--ht-cyan);
+    box-shadow: 0 0 6px var(--ht-cyan);
+  }
+  .hud-todo-progress-label {
+    font-size: 16px;
+    color: var(--ht-text-dim);
+    letter-spacing: 2px;
+    text-align: right;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .hud-todo-scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to bottom, transparent, rgba(0,100,255,0.06), transparent);
+    animation: ht-scan 6s linear infinite;
+    pointer-events: none;
+    z-index: 2;
+  }
+  @keyframes ht-scan { from{top:-2px} to{top:100%} }
+
+  @media (max-width: 600px) {
+    html, body { padding: 0; }
+    .hud-todo-wrap { border: none; min-height: 100vh; width: 100%; }
+    .hud-todo-stat-n { font-size: 22px; }
+    .hud-todo-input-zone { flex-wrap: wrap; }
+    .hud-todo-cat-select { min-width: 120px; }
+  }
+
+  /* Tabs */
+  .hud-todo-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ht-cyan-mid);
+    position: relative;
+  }
+  .hud-todo-tab {
+    font-family: var(--ht-head);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ht-text-dim);
+    padding: 10px 24px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .hud-todo-tab:hover { color: var(--ht-text); }
+  .hud-todo-tab.active {
+    color: var(--ht-cyan);
+    border-bottom-color: var(--ht-cyan);
+    box-shadow: 0 2px 8px var(--ht-cyan-dim);
+  }
+
+  /* Panels */
+  .hud-todo-panel { display: none; }
+  .hud-todo-panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="hud-todo-modal-overlay" id="ht-modal">
+  <div class="hud-todo-modal">
+    <div class="hud-todo-modal-title">◈ Nouvelle catégorie</div>
+    <input class="hud-todo-modal-input" id="ht-cat-inp" type="text" placeholder="◌ Nom de la catégorie..." />
+    <div class="hud-todo-modal-actions">
+      <button class="hud-todo-modal-cancel" onclick="closeModal()">Annuler</button>
+      <button class="hud-todo-btn" onclick="confirmAddCategory()" style="font-size:13px;height:38px;padding:0 16px;">▶ Créer</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud-todo-wrap">
+  <div class="hud-todo-scanline"></div>
+  <div class="hud-todo-corner-tl"></div>
+  <div class="hud-todo-corner-br"></div>
+
+  <div class="hud-todo-header">
+    <div>
+      <div class="hud-todo-title">◈ Tactical Task Manager</div>
+      <div class="hud-todo-id"><span class="hud-todo-status-dot"></span>SYS.ONLINE — OPR.AUTHENTICATED</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button id="ht-login-btn" onclick="signIn()" style="display:none;background:transparent;border:1px solid var(--ht-cyan-mid);color:var(--ht-text-dim);font-family:var(--ht-head);font-size:13px;padding:0 14px;height:30px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--ht-cyan)';this.style.color='var(--ht-cyan)'" onmouseout="this.style.borderColor='var(--ht-cyan-mid)';this.style.color='var(--ht-text-dim)'">⬡ Sign in</button>
+      <div class="hud-todo-id"><span class="hud-todo-sync-dot" id="ht-sync-dot"></span><span id="ht-sync-label">CONNECTING...</span></div>
+      <div class="hud-todo-id" id="ht-clock">00:00:00</div>
+    </div>
+  </div>
+
+  <div class="hud-todo-stats-row">
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-total">0</div><div class="hud-todo-stat-l">Missions</div></div>
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-done">0</div><div class="hud-todo-stat-l">Exécutées</div></div>
+    <div class="hud-todo-stat-box"><div class="hud-todo-stat-n" id="ht-remain">0</div><div class="hud-todo-stat-l">En attente</div></div>
+  </div>
+
+  <div class="hud-todo-progress-wrap"><div class="hud-todo-progress-bar" id="ht-progress" style="width:0%"></div></div>
+  <div class="hud-todo-progress-label" id="ht-progress-label">COMPLETION — 0%</div>
+
+  <div class="hud-todo-tabs">
+    <button class="hud-todo-tab active" id="ht-tab-active" onclick="switchTab('active')">◈ Tactical Task Manager</button>
+    <button class="hud-todo-tab" id="ht-tab-done" onclick="switchTab('done')">◈ Tasks Completed</button>
+  </div>
+
+  <!-- Panel : tâches actives -->
+  <div class="hud-todo-panel active" id="ht-panel-active">
+    <div class="hud-todo-input-zone">
+      <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
+      <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
+      <div class="hud-todo-sphere-pick">
+        <div class="hud-todo-sphere s-low active"  id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
+        <div class="hud-todo-sphere s-med"          id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
+        <div class="hud-todo-sphere s-high"         id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
+      </div>
+      <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
+    </div>
+
+    <button class="hud-todo-btn-cat" onclick="openModal()">+ Add category</button>
+
+    <div class="hud-todo-filter-bar" id="ht-filters">
+      <span class="hud-todo-filter-label">Filtres</span>
+      <button class="hud-todo-filter-btn active" data-cat="all" onclick="setCatFilter('all')">Toutes catégories</button>
+      <div id="ht-cat-filters"></div>
+    </div>
+
+    <div class="hud-todo-section-label">Directives actives</div>
+    <div id="ht-list"></div>
+  </div>
+
+  <!-- Panel : tâches accomplies -->
+  <div class="hud-todo-panel" id="ht-panel-done">
+    <div class="hud-todo-section-label">Directives accomplies</div>
+    <div id="ht-list-done"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAqg5N12AUBXn9ZEzfPSw6pcBwPABqq6jw",
+    authDomain: "hud-todo.firebaseapp.com",
+    projectId: "hud-todo",
+    storageBucket: "hud-todo.firebasestorage.app",
+    messagingSenderId: "265738110346",
+    appId: "1:265738110346:web:faae50b708bc5fc4303473"
+  };
+
+  const app      = initializeApp(firebaseConfig);
+  const db       = getFirestore(app);
+  const auth     = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  let tasks       = [];
+  let categories  = [];
+  let currentTab  = 'active';
+  let currentPrio = 'low';
+  let filterCat   = 'all';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('ht-tab-active').classList.toggle('active', tab === 'active');
+    document.getElementById('ht-tab-done').classList.toggle('active', tab === 'done');
+    document.getElementById('ht-panel-active').classList.toggle('active', tab === 'active');
+    document.getElementById('ht-panel-done').classList.toggle('active', tab === 'done');
+  }
+  window.switchTab = switchTab;
+
+  // Sync indicator
+  function setSync(state, label) {
+    const dot = document.getElementById('ht-sync-dot');
+    const lbl = document.getElementById('ht-sync-label');
+    dot.className = 'hud-todo-sync-dot ' + state;
+    lbl.textContent = label;
+  }
+
+  // Clock
+  function updateClock() {
+    const n = new Date();
+    const pad = v => String(v).padStart(2,'0');
+    document.getElementById('ht-clock').textContent =
+      pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Priority
+  function selectPrio(p) {
+    currentPrio = p;
+    ['high','med','low'].forEach(x => {
+      document.getElementById('ht-sp-' + x).className = 'hud-todo-sphere s-' + x + (x === p ? ' active' : '');
+    });
+  }
+  window.selectPrio = selectPrio;
+
+  // Modal
+  function openModal() {
+    document.getElementById('ht-modal').classList.add('open');
+    setTimeout(() => document.getElementById('ht-cat-inp').focus(), 50);
+  }
+  function closeModal() {
+    document.getElementById('ht-modal').classList.remove('open');
+    document.getElementById('ht-cat-inp').value = '';
+  }
+  async function confirmAddCategory() {
+    const name = document.getElementById('ht-cat-inp').value.trim();
+    if (!name) return;
+    if (categories.find(c => c.name.toLowerCase() === name.toLowerCase())) { closeModal(); return; }
+    setSync('syncing', 'WRITING...');
+    try {
+      await addDoc(collection(db, 'categories'), { name, order: Date.now() });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+    closeModal();
+  }
+  document.getElementById('ht-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+  document.getElementById('ht-cat-inp').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddCategory(); if (e.key === 'Escape') closeModal(); });
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  window.confirmAddCategory = confirmAddCategory;
+
+  // Filters
+  function setCatFilter(c) {
+    filterCat = c;
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === c));
+    render();
+  }
+  window.setCatFilter = setCatFilter;
+
+  function getFilteredTasks() {
+    return tasks.filter(t => filterCat === 'all' || t.cat === filterCat);
+  }
+
+  // Category select + filter buttons
+  function renderCatSelect() {
+    const sel = document.getElementById('ht-cat-sel');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Catégorie —</option>' +
+      categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    if (prev) sel.value = prev;
+
+    document.getElementById('ht-cat-filters').innerHTML = categories.map(c =>
+      `<button class="hud-todo-filter-btn${filterCat === c.id ? ' active' : ''}" data-cat="${c.id}" onclick="setCatFilter('${c.id}')">${c.name}</button>`
+    ).join('');
+  }
+
+  async function delCategory(id) {
+    setSync('syncing', 'WRITING...');
+    try {
+      await deleteDoc(doc(db, 'categories', id));
+      const toUpdate = tasks.filter(t => t.cat === id);
+      for (const t of toUpdate) await updateDoc(doc(db, 'tasks', t.id), { cat: '' });
+      if (filterCat === id) { filterCat = 'all'; document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all')); }
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.delCategory = delCategory;
+
+  // Tasks
+  async function addTask() {
+    const inp  = document.getElementById('ht-inp');
+    const text = inp.value.trim();
+    if (!text) return;
+    const catId = document.getElementById('ht-cat-sel').value;
+    setSync('syncing', 'WRITING...');
+    try {
+      await addDoc(collection(db, 'tasks'), {
+        text,
+        prio: currentPrio,
+        done: false,
+        cat: catId,
+        createdAt: Date.now()
+      });
+      inp.value = '';
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.addTask = addTask;
+
+  async function toggle(id) {
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+    setSync('syncing', 'WRITING...');
+    try {
+      await updateDoc(doc(db, 'tasks', id), { done: !t.done });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.toggle = toggle;
+
+  async function editTask(id) {
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+    const newText = prompt('Modifier la tâche :', t.text);
+    if (!newText || newText.trim() === t.text) return;
+    setSync('syncing', 'WRITING...');
+    try {
+      await updateDoc(doc(db, 'tasks', id), { text: newText.trim() });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.editTask = editTask;
+
+  async function editCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+    const newName = prompt('Modifier la catégorie :', cat.name);
+    if (!newName || newName.trim() === cat.name) return;
+    setSync('syncing', 'WRITING...');
+    try {
+      await updateDoc(doc(db, 'categories', id), { name: newName.trim() });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.editCategory = editCategory;
+
+  async function del(id) {
+    setSync('syncing', 'WRITING...');
+    try {
+      await deleteDoc(doc(db, 'tasks', id));
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.del = del;
+
+  function makeTaskEl(t) {
+    const div = document.createElement('div');
+    div.className = `hud-todo-task-item prio-${t.prio}${t.done ? ' done' : ''}`;
+    div.dataset.id = t.id;
+    div.innerHTML = `
+      <span class="hud-todo-drag-handle" title="Déplacer">⠿</span>
+      <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
+      <div class="hud-todo-task-sphere ${t.prio}"></div>
+      <span class="hud-todo-task-text">${t.text}</span>
+      <button class="hud-todo-edit-btn" onclick="editTask('${t.id}')" title="Modifier">✎</button>
+      <button class="hud-todo-del-btn" onclick="del('${t.id}')">✕</button>`;
+    return div;
+  }
+
+  function makeCatBlock(cat, taskList, showDel) {
+    const catTasks = taskList.filter(t => t.cat === cat.id);
+    if (!catTasks.length) return null;
+
+    const block = document.createElement('div');
+    block.className = 'hud-todo-cat-block';
+    block.dataset.id = cat.id;
+
+    const header = document.createElement('div');
+    header.className = 'hud-todo-cat-header';
+    header.innerHTML = `
+      ${showDel ? '<span class="hud-todo-cat-drag" title="Déplacer bloc">⠿</span>' : ''}
+      <span class="hud-todo-cat-name">◈ ${cat.name}</span>
+      ${showDel ? `<button class="hud-todo-edit-btn" onclick="editCategory('${cat.id}')" title="Modifier">✎</button><button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}`;
+
+    const list = document.createElement('div');
+    list.className = 'hud-todo-task-list';
+    catTasks.forEach(t => list.appendChild(makeTaskEl(t)));
+
+    block.appendChild(header);
+    block.appendChild(list);
+
+    if (showDel) {
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id);
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'tasks', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
+    }
+    return block;
+  }
+
+  function makeUncatBlock(taskList, showDel) {
+    const uncatTasks = taskList.filter(t => !t.cat || t.cat === '');
+    if (!uncatTasks.length) return null;
+
+    const block = document.createElement('div');
+    block.className = 'hud-todo-cat-block';
+    block.dataset.id = '__uncat__';
+
+    const header = document.createElement('div');
+    header.className = 'hud-todo-cat-header';
+    header.innerHTML = `<span class="hud-todo-cat-name" style="color:var(--ht-text-dim)">◌ Sans catégorie</span>`;
+
+    const list = document.createElement('div');
+    list.className = 'hud-todo-task-list';
+    uncatTasks.forEach(t => list.appendChild(makeTaskEl(t)));
+
+    block.appendChild(header);
+    block.appendChild(list);
+
+    if (showDel) {
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id);
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'tasks', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
+    }
+    return block;
+  }
+
+  function render() {
+    const activeTasks = tasks.filter(t => !t.done)
+      .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+    const doneTasks = tasks.filter(t => t.done)
+      .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+    const filtered = activeTasks.filter(t => filterCat === 'all' || t.cat === filterCat);
+    const pct = tasks.length ? Math.round(doneTasks.length / tasks.length * 100) : 0;
+
+    document.getElementById('ht-total').textContent  = tasks.length;
+    document.getElementById('ht-done').textContent   = doneTasks.length;
+    document.getElementById('ht-remain').textContent = activeTasks.length;
+    document.getElementById('ht-progress').style.width = pct + '%';
+    document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
+
+    // Panel actif
+    const list = document.getElementById('ht-list');
+    list.innerHTML = '';
+    if (!filtered.length) {
+      list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
+    } else {
+      categories.forEach(cat => {
+        const block = makeCatBlock(cat, filtered, true);
+        if (block) list.appendChild(block);
+      });
+      const uncat = makeUncatBlock(filtered, true);
+      if (uncat) list.appendChild(uncat);
+
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-cat-drag',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id).filter(id => id !== '__uncat__');
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'categories', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
+    }
+
+    // Panel complété
+    const listDone = document.getElementById('ht-list-done');
+    listDone.innerHTML = '';
+    if (!doneTasks.length) {
+      listDone.innerHTML = '<div class="hud-todo-empty-state">Aucune directive accomplie</div>';
+    } else {
+      categories.forEach(cat => {
+        const block = makeCatBlock(cat, doneTasks, false);
+        if (block) listDone.appendChild(block);
+      });
+      const uncat = makeUncatBlock(doneTasks, false);
+      if (uncat) listDone.appendChild(uncat);
+    }
+  }
+
+  // Auth + realtime listeners
+  let unsubCats  = null;
+  let unsubTasks = null;
+
+  async function signIn() {
+    try { await signInWithPopup(auth, provider); } catch(e) { setSync('error', 'AUTH ERROR'); }
+  }
+  window.signIn = signIn;
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      setSync('synced', 'SYNCED — ' + user.email.split('@')[0].toUpperCase());
+
+      if (unsubCats)  unsubCats();
+      if (unsubTasks) unsubTasks();
+
+      unsubCats = onSnapshot(collection(db, 'categories'), snap => {
+        categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+        renderCatSelect();
+        render();
+      }, () => setSync('error', 'ERROR'));
+
+      unsubTasks = onSnapshot(collection(db, 'tasks'), snap => {
+        tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+        render();
+      }, () => setSync('error', 'ERROR'));
+
+      document.getElementById('ht-login-btn').style.display = 'none';
+    } else {
+      setSync('error', 'NON CONNECTÉ');
+      document.getElementById('ht-login-btn').style.display = 'inline-block';
+      if (unsubCats)  { unsubCats();  unsubCats  = null; }
+      if (unsubTasks) { unsubTasks(); unsubTasks = null; }
+    }
+  });
+
+  document.getElementById('ht-inp').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/hud-todo/sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
