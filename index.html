@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v11.0 — 2026-03-28 -->
+<!-- HUD TODO — v13.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v12.0</title>
+<title>HUD Task Manager v13.0</title>
 <link rel="icon" type="image/x-icon" href="HUD.ico" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <style>
   :root {
     --ht-cyan: #00f5ff;
@@ -463,6 +464,23 @@
   .hud-todo-task-sphere.med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 4px rgba(255,140,0,0.7); }
   .hud-todo-task-sphere.low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 4px rgba(57,255,133,0.7); }
 
+  .hud-todo-drag-handle {
+    color: var(--ht-text-dim);
+    cursor: grab;
+    font-size: 14px;
+    padding: 0 6px 0 0;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+    user-select: none;
+  }
+  .hud-todo-drag-handle:hover { opacity: 1; color: var(--ht-cyan); }
+  .hud-todo-cat-block { cursor: default; }
+  .hud-todo-cat-drag { cursor: grab; color: var(--ht-text-dim); font-size: 13px; opacity: 0.4; transition: opacity 0.15s; margin-right: 8px; user-select: none; }
+  .hud-todo-cat-drag:hover { opacity: 1; color: var(--ht-cyan); }
+  .sortable-ghost { opacity: 0.3; background: var(--ht-cyan-glow) !important; border-color: var(--ht-cyan) !important; }
+  .sortable-chosen { box-shadow: 0 0 16px var(--ht-cyan-dim); }
+
   .hud-todo-edit-btn {
     background: none;
     border: none;
@@ -864,46 +882,108 @@
   }
   window.del = del;
 
-  function taskHTML(t) {
-    return `<div class="hud-todo-task-item prio-${t.prio}${t.done ? ' done' : ''}">
+  function makeTaskEl(t) {
+    const div = document.createElement('div');
+    div.className = `hud-todo-task-item prio-${t.prio}${t.done ? ' done' : ''}`;
+    div.dataset.id = t.id;
+    div.innerHTML = `
+      <span class="hud-todo-drag-handle" title="Déplacer">⠿</span>
       <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
       <div class="hud-todo-task-sphere ${t.prio}"></div>
       <span class="hud-todo-task-text">${t.text}</span>
       <button class="hud-todo-edit-btn" onclick="editTask('${t.id}')" title="Modifier">✎</button>
-      <button class="hud-todo-del-btn" onclick="del('${t.id}')">✕</button>
-    </div>`;
+      <button class="hud-todo-del-btn" onclick="del('${t.id}')">✕</button>`;
+    return div;
   }
 
-  function buildCatBlocks(taskList, showDel) {
-    let html = '';
-    categories.forEach(cat => {
-      const catTasks = taskList.filter(t => t.cat === cat.id);
-      if (!catTasks.length) return;
-      html += `<div class="hud-todo-cat-block">
-        <div class="hud-todo-cat-header">
-          <span class="hud-todo-cat-name">◈ ${cat.name}</span>
-          ${showDel ? `<button class="hud-todo-edit-btn" onclick="editCategory('${cat.id}')" title="Modifier">✎</button><button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}
-        </div>
-        <div class="hud-todo-task-list">${catTasks.map(taskHTML).join('')}</div>
-      </div>`;
-    });
-    const uncatTasks = taskList.filter(t => !t.cat || t.cat === '');
-    if (uncatTasks.length) {
-      html += `<div class="hud-todo-cat-block">
-        <div class="hud-todo-cat-header">
-          <span class="hud-todo-cat-name" style="color:var(--ht-text-dim)">◌ Sans catégorie</span>
-        </div>
-        <div class="hud-todo-task-list">${uncatTasks.map(taskHTML).join('')}</div>
-      </div>`;
+  function makeCatBlock(cat, taskList, showDel) {
+    const catTasks = taskList.filter(t => t.cat === cat.id);
+    if (!catTasks.length) return null;
+
+    const block = document.createElement('div');
+    block.className = 'hud-todo-cat-block';
+    block.dataset.id = cat.id;
+
+    const header = document.createElement('div');
+    header.className = 'hud-todo-cat-header';
+    header.innerHTML = `
+      ${showDel ? '<span class="hud-todo-cat-drag" title="Déplacer bloc">⠿</span>' : ''}
+      <span class="hud-todo-cat-name">◈ ${cat.name}</span>
+      ${showDel ? `<button class="hud-todo-edit-btn" onclick="editCategory('${cat.id}')" title="Modifier">✎</button><button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}`;
+
+    const list = document.createElement('div');
+    list.className = 'hud-todo-task-list';
+    catTasks.forEach(t => list.appendChild(makeTaskEl(t)));
+
+    block.appendChild(header);
+    block.appendChild(list);
+
+    if (showDel) {
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id);
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'tasks', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
     }
-    return html;
+    return block;
+  }
+
+  function makeUncatBlock(taskList, showDel) {
+    const uncatTasks = taskList.filter(t => !t.cat || t.cat === '');
+    if (!uncatTasks.length) return null;
+
+    const block = document.createElement('div');
+    block.className = 'hud-todo-cat-block';
+    block.dataset.id = '__uncat__';
+
+    const header = document.createElement('div');
+    header.className = 'hud-todo-cat-header';
+    header.innerHTML = `<span class="hud-todo-cat-name" style="color:var(--ht-text-dim)">◌ Sans catégorie</span>`;
+
+    const list = document.createElement('div');
+    list.className = 'hud-todo-task-list';
+    uncatTasks.forEach(t => list.appendChild(makeTaskEl(t)));
+
+    block.appendChild(header);
+    block.appendChild(list);
+
+    if (showDel) {
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-drag-handle',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id);
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'tasks', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
+    }
+    return block;
   }
 
   function render() {
-    const activeTasks = tasks.filter(t => !t.done);
-    const doneTasks   = tasks.filter(t => t.done);
-    const filtered    = activeTasks.filter(t => filterCat === 'all' || t.cat === filterCat);
-    const pct         = tasks.length ? Math.round(doneTasks.length / tasks.length * 100) : 0;
+    const activeTasks = tasks.filter(t => !t.done)
+      .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+    const doneTasks = tasks.filter(t => t.done)
+      .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
+    const filtered = activeTasks.filter(t => filterCat === 'all' || t.cat === filterCat);
+    const pct = tasks.length ? Math.round(doneTasks.length / tasks.length * 100) : 0;
 
     document.getElementById('ht-total').textContent  = tasks.length;
     document.getElementById('ht-done').textContent   = doneTasks.length;
@@ -911,18 +991,48 @@
     document.getElementById('ht-progress').style.width = pct + '%';
     document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
 
+    // Panel actif
     const list = document.getElementById('ht-list');
+    list.innerHTML = '';
     if (!filtered.length) {
       list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
     } else {
-      list.innerHTML = buildCatBlocks(filtered, true);
+      categories.forEach(cat => {
+        const block = makeCatBlock(cat, filtered, true);
+        if (block) list.appendChild(block);
+      });
+      const uncat = makeUncatBlock(filtered, true);
+      if (uncat) list.appendChild(uncat);
+
+      Sortable.create(list, {
+        animation: 150,
+        handle: '.hud-todo-cat-drag',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: async (evt) => {
+          const ids = [...evt.to.children].map(el => el.dataset.id).filter(id => id !== '__uncat__');
+          setSync('syncing', 'WRITING...');
+          try {
+            const batch = ids.map((id, i) => updateDoc(doc(db, 'categories', id), { order: i }));
+            await Promise.all(batch);
+            setSync('synced', 'SYNCED');
+          } catch(e) { setSync('error', 'ERROR'); }
+        }
+      });
     }
 
+    // Panel complété
     const listDone = document.getElementById('ht-list-done');
+    listDone.innerHTML = '';
     if (!doneTasks.length) {
       listDone.innerHTML = '<div class="hud-todo-empty-state">Aucune directive accomplie</div>';
     } else {
-      listDone.innerHTML = buildCatBlocks(doneTasks, false);
+      categories.forEach(cat => {
+        const block = makeCatBlock(cat, doneTasks, false);
+        if (block) listDone.appendChild(block);
+      });
+      const uncat = makeUncatBlock(doneTasks, false);
+      if (uncat) listDone.appendChild(uncat);
     }
   }
 
@@ -951,7 +1061,7 @@
 
       unsubTasks = onSnapshot(collection(db, 'tasks'), snap => {
         tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          .sort((a, b) => (a.order ?? a.createdAt ?? 0) - (b.order ?? b.createdAt ?? 0));
         render();
       }, () => setSync('error', 'ERROR'));
 
