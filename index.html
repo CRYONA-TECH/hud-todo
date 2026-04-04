@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v13.0 — 2026-03-28 -->
+<!-- HUD TODO — v14.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v13.0</title>
+<title>HUD Task Manager v14.0</title>
 <link rel="icon" type="image/x-icon" href="HUD.ico" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#00f5ff" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -1075,6 +1077,11 @@
   });
 
   document.getElementById('ht-inp').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/hud-todo/sw.js').catch(() => {});
+  }
 </script>
 </body>
 </html>

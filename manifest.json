@@ -1,0 +1,17 @@
+{
+  "name": "HUD Task Manager",
+  "short_name": "HUD TODO",
+  "description": "Tactical task manager — sci-fi HUD style",
+  "start_url": "/hud-todo/",
+  "display": "standalone",
+  "background_color": "#020818",
+  "theme_color": "#00f5ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "HUD.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
