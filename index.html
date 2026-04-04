@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v9.0 — 2026-03-28 -->
+<!-- HUD TODO — v10.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v9.0</title>
+<title>HUD Task Manager v10.0</title>
 <link rel="icon" type="image/x-icon" href="HUD.ico" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -549,6 +549,39 @@
     .hud-todo-input-zone { flex-wrap: wrap; }
     .hud-todo-cat-select { min-width: 120px; }
   }
+
+  /* Tabs */
+  .hud-todo-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ht-cyan-mid);
+    position: relative;
+  }
+  .hud-todo-tab {
+    font-family: var(--ht-head);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ht-text-dim);
+    padding: 10px 24px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .hud-todo-tab:hover { color: var(--ht-text); }
+  .hud-todo-tab.active {
+    color: var(--ht-cyan);
+    border-bottom-color: var(--ht-cyan);
+    box-shadow: 0 2px 8px var(--ht-cyan-dim);
+  }
+
+  /* Panels */
+  .hud-todo-panel { display: none; }
+  .hud-todo-panel.active { display: block; }
 </style>
 </head>
 <body>
@@ -590,27 +623,41 @@
   <div class="hud-todo-progress-wrap"><div class="hud-todo-progress-bar" id="ht-progress" style="width:0%"></div></div>
   <div class="hud-todo-progress-label" id="ht-progress-label">COMPLETION — 0%</div>
 
-  <div class="hud-todo-input-zone">
-    <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
-    <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
-    <div class="hud-todo-sphere-pick">
-      <div class="hud-todo-sphere s-low active"  id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
-      <div class="hud-todo-sphere s-med"          id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
-      <div class="hud-todo-sphere s-high"         id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
+  <div class="hud-todo-tabs">
+    <button class="hud-todo-tab active" id="ht-tab-active" onclick="switchTab('active')">◈ Tactical Task Manager</button>
+    <button class="hud-todo-tab" id="ht-tab-done" onclick="switchTab('done')">◈ Tasks Completed</button>
+  </div>
+
+  <!-- Panel : tâches actives -->
+  <div class="hud-todo-panel active" id="ht-panel-active">
+    <div class="hud-todo-input-zone">
+      <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
+      <select class="hud-todo-cat-select" id="ht-cat-sel"></select>
+      <div class="hud-todo-sphere-pick">
+        <div class="hud-todo-sphere s-low active"  id="ht-sp-low"  onclick="selectPrio('low')"  title="Basse"></div>
+        <div class="hud-todo-sphere s-med"          id="ht-sp-med"  onclick="selectPrio('med')"  title="Normale"></div>
+        <div class="hud-todo-sphere s-high"         id="ht-sp-high" onclick="selectPrio('high')" title="Haute"></div>
+      </div>
+      <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
     </div>
-    <button class="hud-todo-btn" onclick="addTask()">▶ EXEC</button>
+
+    <button class="hud-todo-btn-cat" onclick="openModal()">+ Add category</button>
+
+    <div class="hud-todo-filter-bar" id="ht-filters">
+      <span class="hud-todo-filter-label">Filtres</span>
+      <button class="hud-todo-filter-btn active" data-cat="all" onclick="setCatFilter('all')">Toutes catégories</button>
+      <div id="ht-cat-filters"></div>
+    </div>
+
+    <div class="hud-todo-section-label">Directives actives</div>
+    <div id="ht-list"></div>
   </div>
 
-  <button class="hud-todo-btn-cat" onclick="openModal()">+ Add category</button>
-
-  <div class="hud-todo-filter-bar" id="ht-filters">
-    <span class="hud-todo-filter-label">Filtres</span>
-    <button class="hud-todo-filter-btn active" data-cat="all" onclick="setCatFilter('all')">Toutes catégories</button>
-    <div id="ht-cat-filters"></div>
+  <!-- Panel : tâches accomplies -->
+  <div class="hud-todo-panel" id="ht-panel-done">
+    <div class="hud-todo-section-label">Directives accomplies</div>
+    <div id="ht-list-done"></div>
   </div>
-
-  <div class="hud-todo-section-label">Directives actives</div>
-  <div id="ht-list"></div>
 </div>
 
 <script type="module">
@@ -634,7 +681,16 @@
 
   let tasks      = [];
   let categories = [];
-  let currentPrio = 'low';
+  let currentTab = 'active';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('ht-tab-active').classList.toggle('active', tab === 'active');
+    document.getElementById('ht-tab-done').classList.toggle('active', tab === 'done');
+    document.getElementById('ht-panel-active').classList.toggle('active', tab === 'active');
+    document.getElementById('ht-panel-done').classList.toggle('active', tab === 'done');
+  }
+  window.switchTab = switchTab;
   let filterCat   = 'all';
 
   // Sync indicator
@@ -777,45 +833,56 @@
     </div>`;
   }
 
-  function render() {
-    const filtered = getFilteredTasks();
-    const done = tasks.filter(t => t.done).length;
-    const pct  = tasks.length ? Math.round(done / tasks.length * 100) : 0;
-    document.getElementById('ht-total').textContent  = tasks.length;
-    document.getElementById('ht-done').textContent   = done;
-    document.getElementById('ht-remain').textContent = tasks.length - done;
-    document.getElementById('ht-progress').style.width = pct + '%';
-    document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
-
-    const list = document.getElementById('ht-list');
-    if (!filtered.length) { list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>'; return; }
-
+  function buildCatBlocks(taskList, showDel) {
     let html = '';
     categories.forEach(cat => {
-      const catTasks = filtered.filter(t => t.cat === cat.id);
+      const catTasks = taskList.filter(t => t.cat === cat.id);
       if (!catTasks.length) return;
-      const catDone = catTasks.filter(t => t.done).length;
       html += `<div class="hud-todo-cat-block">
         <div class="hud-todo-cat-header">
           <span class="hud-todo-cat-name">◈ ${cat.name}</span>
-          <span class="hud-todo-cat-count">${catDone}/${catTasks.length}</span>
-          <button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>
+          ${showDel ? `<button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}
         </div>
         <div class="hud-todo-task-list">${catTasks.map(taskHTML).join('')}</div>
       </div>`;
     });
-
-    const uncatTasks = filtered.filter(t => !t.cat || t.cat === '');
+    const uncatTasks = taskList.filter(t => !t.cat || t.cat === '');
     if (uncatTasks.length) {
       html += `<div class="hud-todo-cat-block">
         <div class="hud-todo-cat-header">
           <span class="hud-todo-cat-name" style="color:var(--ht-text-dim)">◌ Sans catégorie</span>
-          <span class="hud-todo-cat-count">${uncatTasks.filter(t=>t.done).length}/${uncatTasks.length}</span>
         </div>
         <div class="hud-todo-task-list">${uncatTasks.map(taskHTML).join('')}</div>
       </div>`;
     }
-    list.innerHTML = html;
+    return html;
+  }
+
+  function render() {
+    const activeTasks = tasks.filter(t => !t.done);
+    const doneTasks   = tasks.filter(t => t.done);
+    const filtered    = activeTasks.filter(t => filterCat === 'all' || t.cat === filterCat);
+    const pct         = tasks.length ? Math.round(doneTasks.length / tasks.length * 100) : 0;
+
+    document.getElementById('ht-total').textContent  = tasks.length;
+    document.getElementById('ht-done').textContent   = doneTasks.length;
+    document.getElementById('ht-remain').textContent = activeTasks.length;
+    document.getElementById('ht-progress').style.width = pct + '%';
+    document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
+
+    const list = document.getElementById('ht-list');
+    if (!filtered.length) {
+      list.innerHTML = '<div class="hud-todo-empty-state">Aucune directive en cours</div>';
+    } else {
+      list.innerHTML = buildCatBlocks(filtered, true);
+    }
+
+    const listDone = document.getElementById('ht-list-done');
+    if (!doneTasks.length) {
+      listDone.innerHTML = '<div class="hud-todo-empty-state">Aucune directive accomplie</div>';
+    } else {
+      listDone.innerHTML = buildCatBlocks(doneTasks, false);
+    }
   }
 
   // Auth + realtime listeners
