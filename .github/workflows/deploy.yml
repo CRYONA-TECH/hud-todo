@@ -26,6 +26,8 @@ jobs:
           mkdir -p gh-pages
           cp "${{ steps.find.outputs.file }}" gh-pages/index.html
           cp DEPLOY/HUD.ico gh-pages/HUD.ico
+          cp DEPLOY/manifest.json gh-pages/manifest.json
+          cp DEPLOY/sw.js gh-pages/sw.js
 
       - name: Push to gh-pages branch
         uses: JamesIves/github-pages-deploy-action@v4.7.3
