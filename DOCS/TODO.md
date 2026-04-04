@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- [ ] Drag & drop — réordonner les tâches via SortableJS + Firestore (~2-3h)
 - [ ] PWA — manifest.json + service worker, installation mobile (~1-2h)
 
 ## Terminé
@@ -20,3 +19,6 @@
 - [x] v7 : priorité basse par défaut — 2026-03-28
 - [x] v8 : Firebase Auth Google + mode production — 2026-03-28
 - [x] v9 : favicon HUD.ico — 2026-03-28
+- [x] v10 : onglets actif / completed, suppression compteurs catégorie — 2026-03-28
+- [x] v11/v12 : édition tâches et catégories + fix variables — 2026-03-28
+- [x] v13 : drag & drop tâches + blocs catégorie (SortableJS + Firestore) — 2026-03-28

@@ -1,9 +1,42 @@
 # Changelog
 
+## v13.0 — 2026-03-28
+
+- Drag & drop des tâches au sein d'une catégorie (handle `⠿`, SortableJS)
+- Drag & drop des blocs de catégorie (handle `⠿` dans le header)
+- Ordre sauvegardé dans Firestore après chaque drop (champ `order`)
+- Tâches triées par `order` en priorité, `createdAt` en fallback
+- Panel "Tasks Completed" non draggable (lecture seule)
+
+---
+
+## v12.0 — 2026-03-28
+
+- Fix : `currentPrio` et `filterCat` déclarés au bon endroit (ReferenceError corrigé)
+- Icône `✎` pour éditer le nom d'une tâche (prompt natif + update Firestore)
+- Icône `✎` pour éditer le nom d'une catégorie (prompt natif + update Firestore)
+
+---
+
+## v11.0 — 2026-03-28
+
+- Fix déclaration variables `currentPrio` / `filterCat` (résolution ReferenceError)
+
+---
+
+## v10.0 — 2026-03-28
+
+- Deux onglets HUD : `◈ TACTICAL TASK MANAGER` / `◈ TASKS COMPLETED`
+- Tâches actives et accomplies séparées dans deux panneaux distincts
+- Même structure par blocs catégorie dans les deux panneaux
+- Compteurs `X/Y` supprimés des headers catégorie
+- Bouton `✕ suppr.` uniquement dans le panneau actif
+
+---
+
 ## v9.0 — 2026-03-28
 
-- Ajout favicon `HUD.ico` dans `DEPLOY/`
-- Lien favicon dans `<head>` : `<link rel="icon" type="image/x-icon" href="HUD.ico" />`
+- Favicon `HUD.ico` dans l'onglet navigateur
 - Modification `deploy.yml` pour copier `HUD.ico` vers branche `gh-pages`
 
 ---
@@ -13,9 +46,7 @@
 - Firebase Auth Google intégré
 - Bouton `⬡ Sign in` dans le header (masqué après connexion)
 - Reconnexion automatique après premier login
-- Indicateur sync affiche `SYNCED — PRENOM` une fois connecté
-- Listeners Firestore activés uniquement après authentification
-- Règles Firestore passées en mode production (UID unique autorisé)
+- Règles Firestore en mode production (UID unique autorisé)
 - Domaine `cryona-tech.github.io` ajouté aux domaines autorisés Firebase
 
 ---
@@ -37,7 +68,6 @@
 - Remplacement de `localStorage` par Firebase Firestore
 - Sync temps réel PC ↔ mobile via `onSnapshot`
 - Indicateur de statut sync dans le header
-- IDs tâches et catégories en strings Firestore
 
 ---
 
@@ -45,7 +75,6 @@
 
 - Filtres par catégorie (boutons toggle)
 - Suppression filtres priorité
-- Label sphère rouge : "Critique" → "Haute"
 
 ---
 
@@ -53,7 +82,7 @@
 
 - Système de catégories avec modale HUD
 - Tâches classées par blocs de catégorie
-- Fix compteur missions (comparaison stricte string/string)
+- Fix compteur missions
 
 ---
 
