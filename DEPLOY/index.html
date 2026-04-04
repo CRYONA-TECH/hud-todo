@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v10.0 — 2026-03-28 -->
+<!-- HUD TODO — v11.0 — 2026-03-28 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v10.0</title>
+<title>HUD Task Manager v11.0</title>
 <link rel="icon" type="image/x-icon" href="HUD.ico" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -463,6 +463,19 @@
   .hud-todo-task-sphere.med  { background: radial-gradient(circle at 35% 35%, #ffb84d, #ff8c00, #7a3d00); box-shadow: 0 0 4px rgba(255,140,0,0.7); }
   .hud-todo-task-sphere.low  { background: radial-gradient(circle at 35% 35%, #80ffb3, #39ff85, #0a6630); box-shadow: 0 0 4px rgba(57,255,133,0.7); }
 
+  .hud-todo-edit-btn {
+    background: none;
+    border: none;
+    color: rgba(160,200,240,0.3);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    transition: color 0.15s;
+    font-family: var(--ht-mono);
+    flex-shrink: 0;
+  }
+  .hud-todo-edit-btn:hover { color: var(--ht-cyan); }
+
   .hud-todo-del-btn {
     background: none;
     border: none;
@@ -815,6 +828,32 @@
   }
   window.toggle = toggle;
 
+  async function editTask(id) {
+    const t = tasks.find(t => t.id === id);
+    if (!t) return;
+    const newText = prompt('Modifier la tâche :', t.text);
+    if (!newText || newText.trim() === t.text) return;
+    setSync('syncing', 'WRITING...');
+    try {
+      await updateDoc(doc(db, 'tasks', id), { text: newText.trim() });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.editTask = editTask;
+
+  async function editCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+    const newName = prompt('Modifier la catégorie :', cat.name);
+    if (!newName || newName.trim() === cat.name) return;
+    setSync('syncing', 'WRITING...');
+    try {
+      await updateDoc(doc(db, 'categories', id), { name: newName.trim() });
+      setSync('synced', 'SYNCED');
+    } catch(e) { setSync('error', 'ERROR'); }
+  }
+  window.editCategory = editCategory;
+
   async function del(id) {
     setSync('syncing', 'WRITING...');
     try {
@@ -829,6 +868,7 @@
       <input class="hud-todo-check" type="checkbox" ${t.done ? 'checked' : ''} onchange="toggle('${t.id}')" />
       <div class="hud-todo-task-sphere ${t.prio}"></div>
       <span class="hud-todo-task-text">${t.text}</span>
+      <button class="hud-todo-edit-btn" onclick="editTask('${t.id}')" title="Modifier">✎</button>
       <button class="hud-todo-del-btn" onclick="del('${t.id}')">✕</button>
     </div>`;
   }
@@ -841,7 +881,7 @@
       html += `<div class="hud-todo-cat-block">
         <div class="hud-todo-cat-header">
           <span class="hud-todo-cat-name">◈ ${cat.name}</span>
-          ${showDel ? `<button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}
+          ${showDel ? `<button class="hud-todo-edit-btn" onclick="editCategory('${cat.id}')" title="Modifier">✎</button><button class="hud-todo-cat-del" onclick="delCategory('${cat.id}')">✕ suppr.</button>` : ''}
         </div>
         <div class="hud-todo-task-list">${catTasks.map(taskHTML).join('')}</div>
       </div>`;
