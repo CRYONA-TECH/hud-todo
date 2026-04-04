@@ -26,6 +26,8 @@ jobs:
           mkdir -p gh-pages
           cp "${{ steps.find.outputs.file }}" gh-pages/index.html
           cp DEPLOY/HUD.ico gh-pages/HUD.ico
+          cp DEPLOY/HUD-192.png gh-pages/HUD-192.png
+          cp DEPLOY/HUD-512.png gh-pages/HUD-512.png
           cp DEPLOY/manifest.json gh-pages/manifest.json
           cp DEPLOY/sw.js gh-pages/sw.js
 
