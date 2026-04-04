@@ -692,9 +692,11 @@
   const auth     = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  let tasks      = [];
-  let categories = [];
-  let currentTab = 'active';
+  let tasks       = [];
+  let categories  = [];
+  let currentTab  = 'active';
+  let currentPrio = 'low';
+  let filterCat   = 'all';
 
   function switchTab(tab) {
     currentTab = tab;
@@ -704,7 +706,6 @@
     document.getElementById('ht-panel-done').classList.toggle('active', tab === 'done');
   }
   window.switchTab = switchTab;
-  let filterCat   = 'all';
 
   // Sync indicator
   function setSync(state, label) {
