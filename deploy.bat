@@ -19,7 +19,7 @@ for %%F in ("%SRC%\hud_todo_v*.html") do (
 )
 
 if "%LATEST%"=="" (
-    echo [ERROR] Aucun fichier hud_todo_vX.html trouve dans %SRC%\
+    echo [ERROR] No hud_todo_vX.html file found in %SRC%\
     pause & exit /b 1
 )
 
@@ -34,5 +34,5 @@ copy /Y "%LATEST%" "%DEPLOY%\index.html" >nul
 echo [DEPLOY]  %DEPLOY%\index.html
 
 echo.
-echo Done. v%LATEST_VER% deploye.
+echo Done. v%LATEST_VER% deployed.
 pause
