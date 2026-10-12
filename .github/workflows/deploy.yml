@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'SRC/hud_todo_v*.html'
+      - 'SRC/hud_todo_v*.css'
   workflow_dispatch:
 
 jobs:
@@ -24,7 +25,9 @@ jobs:
       - name: Prepare gh-pages
         run: |
           mkdir -p gh-pages
-          cp "${{ steps.find.outputs.file }}" gh-pages/index.html
+          FILE="${{ steps.find.outputs.file }}"
+          cp "$FILE" gh-pages/index.html
+          cp "${FILE%.html}.css" gh-pages/hud_todo.css
           cp DEPLOY/HUD.ico gh-pages/HUD.ico
           cp DEPLOY/HUD-192.png gh-pages/HUD-192.png
           cp DEPLOY/HUD-512.png gh-pages/HUD-512.png

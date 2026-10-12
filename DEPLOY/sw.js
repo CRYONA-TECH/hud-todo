@@ -1,7 +1,8 @@
-const CACHE = 'hud-todo-v1';
+const CACHE = 'hud-todo-v2';
 const ASSETS = [
   '/hud-todo/',
   '/hud-todo/index.html',
+  '/hud-todo/hud_todo.css',
   '/hud-todo/HUD.ico',
   '/hud-todo/manifest.json'
 ];
