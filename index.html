@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- HUD TODO — v14.0 — 2026-03-28 -->
+<!-- HUD TODO — v15.0 — 2026-10-12 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HUD Task Manager v14.0</title>
+<title>HUD Task Manager v15.0</title>
 <link rel="icon" type="image/x-icon" href="HUD.ico" />
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#00f5ff" />
@@ -661,7 +661,7 @@
     <button class="hud-todo-tab" id="ht-tab-done" onclick="switchTab('done')">◈ Tasks Completed</button>
   </div>
 
-  <!-- Panel : tâches actives -->
+  <!-- Panel: active tasks -->
   <div class="hud-todo-panel active" id="ht-panel-active">
     <div class="hud-todo-input-zone">
       <input class="hud-todo-input" id="ht-inp" type="text" placeholder="◌ Entrer directive..." />
@@ -686,7 +686,7 @@
     <div id="ht-list"></div>
   </div>
 
-  <!-- Panel : tâches accomplies -->
+  <!-- Panel: completed tasks -->
   <div class="hud-todo-panel" id="ht-panel-done">
     <div class="hud-todo-section-label">Directives accomplies</div>
     <div id="ht-list-done"></div>
@@ -993,7 +993,7 @@
     document.getElementById('ht-progress').style.width = pct + '%';
     document.getElementById('ht-progress-label').textContent = 'COMPLETION — ' + pct + '%';
 
-    // Panel actif
+    // Active panel
     const list = document.getElementById('ht-list');
     list.innerHTML = '';
     if (!filtered.length) {
@@ -1023,7 +1023,7 @@
       });
     }
 
-    // Panel complété
+    // Completed panel
     const listDone = document.getElementById('ht-list-done');
     listDone.innerHTML = '';
     if (!doneTasks.length) {
